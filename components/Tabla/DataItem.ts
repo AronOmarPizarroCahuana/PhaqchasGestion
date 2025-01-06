@@ -1,0 +1,31 @@
+export type DataItem = {
+    hour: string;
+    Lunes_user_name: string;
+    Lunes_status: string;
+    Lunes_yape: number;
+    Lunes_total: number;
+    Martes_status: string;
+    Martes_user_name: string;
+    Martes_yape: number;
+    Martes_total: number;
+    Miercoles_status: string;
+    Miercoles_user_name: string;
+    Miercoles_yape: number;
+    Miercoles_total: number;
+    Jueves_status: string;
+    Jueves_user_name: string;
+    Jueves_yape: number;
+    Jueves_total: number;
+    Viernes_status: string;
+    Viernes_user_name: string;
+    Viernes_yape: number;
+    Viernes_total: number;
+    Sabado_status: string;
+    Sabado_user_name: string;
+    Sabado_yape: number;
+    Sabado_total: number;
+    Domingo_status: string;
+    Domingo_user_name: string;
+    Domingo_yape: number;
+    Domingo_total: number;
+}

@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { format, startOfWeek, addWeeks, subWeeks } from 'date-fns';
+import { format, startOfWeek, addWeeks, subWeeks,addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Tabla from '../Tabla/Tabla';
 import TablaTop from '../TablaTop/TablaTop';
-const fields = ['CAMPO 1', 'CAMPO 2', 'CAMPO 3', 'CAMPO 4'];
+const fields = ['1', '2', '3', '4'];
 
 export default function Booking() {
   const [currentWeekStart, setCurrentWeekStart] = useState(
@@ -14,7 +14,8 @@ export default function Booking() {
 
   const handlePreviousWeek = () => setCurrentWeekStart(subWeeks(currentWeekStart, 1));
   const handleNextWeek = () => setCurrentWeekStart(addWeeks(currentWeekStart, 1));
-
+  const startDate = format(currentWeekStart, 'yyyy-MM-dd');
+  const endDate = format(addDays(currentWeekStart, 6), 'yyyy-MM-dd');
   return (
     <div className="p-6 bg-[#EFEFEF] rounded-lg shadow-lg space-y-8">
      
@@ -40,7 +41,7 @@ export default function Booking() {
         </button>
       </div>
       <TablaTop></TablaTop>
-            <Tabla field={field} currentWeekStart={currentWeekStart} />
+            <Tabla field={field} startDate={startDate} endDate={endDate} currentWeekStart={currentWeekStart} />
           </div>
         ))}
       </div>

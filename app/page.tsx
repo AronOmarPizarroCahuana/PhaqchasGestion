@@ -1,5 +1,4 @@
-import Image from "next/image";
-import NavbarTop from "@/components/NavbarTop/NavbarTop";
+
 import Booking from "@/components/Booking/Booking";
 
 export default function Home() {
