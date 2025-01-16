@@ -28,7 +28,7 @@ export default function Booking() {
           className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
           onClick={handlePreviousWeek}
         >
-          Semana Anterior
+          <span className='text-[10px] leading-3 md:text-md'>Semana Anterior</span>
         </button>
         <h2 className="text-xl font-semibold text-center flex-grow text-gray-700">
           {format(currentWeekStart, 'MMMM yyyy', { locale: es }).toUpperCase()}

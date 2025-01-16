@@ -5,13 +5,19 @@ import Menu from "../Menu/Menu";
 export default function NavbarTop() {
 
     return (
-        <nav className="fixed top-0 left-0 w-screen h-16 flex items-center px-4 z-50 bg-white">
+        <nav className="top-0 left-0 fixed w-full h-16 flex items-center px-4 bg-white z-50">
+        {/* Menú a la izquierda */}
         <div className="flex items-center">
-            <Menu />
+          <Menu />
         </div>
-        <div className="absolute left-1/2 transform -translate-x-1/2 mt-6">
-            <Logo />
+      
+        {/* Logo centrado en pantallas grandes, a la derecha en móviles */}
+        <div className="md:absolute md:left-1/2 md:transform md:-translate-x-1/2 ml-auto mt-5 md:mt-5">
+          <Logo />
         </div>
-    </nav>
+      </nav>
+      
+      
+      
     );
 }

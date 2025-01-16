@@ -145,7 +145,7 @@ export default function ReservaM({
       start_time: startTime,
       end_time: endTime,
       status: 'reservado',
-      total: Number(price), // Asegúrate de que price sea un número
+      total: Number(yape), // Asegúrate de que price sea un número
     };
   
     console.log('Datos que se enviarán a la API:', requestData);

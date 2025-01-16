@@ -17,7 +17,7 @@ export default function NavbarLeft() {
   return (
     <nav className="fixed top-0 left-0 h-screen w-64 bg-white text-[#191D23] p-4 z-50 shadow-lg">
       <ul className="space-y-2">
-        {/* Menú principal */}
+    
         <li className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md transition-colors duration-300 ease-in-out cursor-pointer">
           <Link href="/Reserva" className="flex items-center space-x-2">
             <FaCalendarCheck />
@@ -31,7 +31,6 @@ export default function NavbarLeft() {
           </Link>
         </li>
 
-        {/* Cliente */}
         <li
           className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
           onClick={() => setIsClientMenuOpen(!isClientMenuOpen)}
@@ -50,7 +49,7 @@ export default function NavbarLeft() {
           <ul className="space-y-2 pl-6">
             <li>
               <Link
-                href="/auth/Reserva"
+                href="/Mantenimiento-cliente"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Mantenimiento
@@ -58,24 +57,17 @@ export default function NavbarLeft() {
             </li>
             <li>
               <Link
-                href="/auth/Reserva"
+                href="/Historial-cliente"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Historial
               </Link>
             </li>
-            <li>
-              <Link
-                href="/auth/Reserva"
-                className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
-              >
-                Lista negra
-              </Link>
-            </li>
+           
           </ul>
         )}
 
-        {/* Administradores */}
+      
         <li
           className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
           onClick={() => setIsAdminMenuOpen(!isAdminMenuOpen)}
@@ -94,7 +86,7 @@ export default function NavbarLeft() {
           <ul className="space-y-2 pl-6">
             <li>
               <Link
-                href="/auth/Reserva"
+                href="/Mantenimiento-rol"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Mantenimiento roles
@@ -103,7 +95,7 @@ export default function NavbarLeft() {
           </ul>
         )}
 
-        {/* Reporte */}
+      
         <li
           className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
           onClick={() => setIsReportMenuOpen(!isReportMenuOpen)}

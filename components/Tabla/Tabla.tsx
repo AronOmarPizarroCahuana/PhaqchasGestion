@@ -3,6 +3,7 @@ import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
 import ReservaM from "../ReservaM/ReservaM";
 import { DataItem } from "./DataItem";
+import { Table } from '@/components/ui/table';
 
 interface TablaProps {
   field: string;
@@ -129,12 +130,12 @@ export default function Tabla({
   if (error) return <p>Error: {error}</p>;
 
   return (
-    <div>
-      <table className="table-fixed w-full text-sm  border-separate ">
+    <div className="overflow-x-auto" >
+      <Table className="table-fixed w-full text-sm  border-separate min-w-[1500px] w-fulls" >
         <thead className="bg-gray-100">
           <tr>
-            <th className=""></th>
-            <th className="border p-3 bg-[#5A6BA0] text-white">Hora</th>
+            <th className="w-[5%]"></th>
+            <th className="border p-3 bg-[#5A6BA0] text-white w-[9%]">Hora</th>
             {days.map((day) => (
               <th
                 key={day.toISOString()}
@@ -287,7 +288,7 @@ export default function Tabla({
             </tr>
           ))}
         </tbody>
-      </table>
+      </Table>
 
      
       {modalData && isModalOpen && (
