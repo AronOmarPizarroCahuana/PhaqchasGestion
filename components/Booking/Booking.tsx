@@ -28,7 +28,7 @@ export default function Booking() {
           className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
           onClick={handlePreviousWeek}
         >
-          <span className='text-[10px] leading-3 md:text-md'>Semana Anterior</span>
+        Semana Anterior
         </button>
         <h2 className="text-xl font-semibold text-center flex-grow text-gray-700">
           {format(currentWeekStart, 'MMMM yyyy', { locale: es }).toUpperCase()}
@@ -41,7 +41,7 @@ export default function Booking() {
         </button>
       </div>
       <TablaTop></TablaTop>
-            <Tabla field={field} startDate={startDate} endDate={endDate} currentWeekStart={currentWeekStart} />
+            <Tabla id={field} field={field} startDate={startDate} endDate={endDate} currentWeekStart={currentWeekStart} />
           </div>
         ))}
       </div>

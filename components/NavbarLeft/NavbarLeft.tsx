@@ -19,13 +19,13 @@ export default function NavbarLeft() {
       <ul className="space-y-2">
     
         <li className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md transition-colors duration-300 ease-in-out cursor-pointer">
-          <Link href="/Reserva" className="flex items-center space-x-2">
+          <Link href="/AdminGestion/Reserva" className="flex items-center space-x-2">
             <FaCalendarCheck />
             <span>Reserva</span>
           </Link>
         </li>
         <li className="flex items-center space-x-2 font-medium text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md transition-colors duration-300 ease-in-out cursor-pointer">
-          <Link href="/Anuncio" className="flex items-center space-x-2">
+          <Link href="/AdminGestion/Anuncio" className="flex items-center space-x-2">
             <FaBullhorn />
             <span>Anuncio web</span>
           </Link>
@@ -57,7 +57,7 @@ export default function NavbarLeft() {
             </li>
             <li>
               <Link
-                href="/Historial-cliente"
+                href="/AdminGestion/Historial-cliente"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Historial
@@ -86,7 +86,7 @@ export default function NavbarLeft() {
           <ul className="space-y-2 pl-6">
             <li>
               <Link
-                href="/Mantenimiento-rol"
+                href="/AdminGestion/Mantenimiento-rol"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Mantenimiento roles
@@ -114,7 +114,7 @@ export default function NavbarLeft() {
           <ul className="space-y-2 pl-6">
             <li>
               <Link
-                href="/auth/Reserva"
+                href="/AdminGestion/Report-semana"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Semana
@@ -122,7 +122,7 @@ export default function NavbarLeft() {
             </li>
             <li>
               <Link
-                href="/auth/Reserva"
+                href="/AdminGestion/Report-semana"
                 className="text-lg text-gray-600 hover:bg-gray-100 p-2 rounded-md cursor-pointer"
               >
                 Mes

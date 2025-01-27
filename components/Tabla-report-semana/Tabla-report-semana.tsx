@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { Reservation, Day } from './Reservation';
+import { Reservation, Day } from '../Tabla/Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
@@ -31,16 +31,7 @@ export default function Tabla({
     yape?: number;
   } | null>(null);
 
-  const [isModalOpenE, setIsModalOpenE] = useState(false);
-  const [modalDataE, setModalDataE] = useState<{
-    timeStart: string;
-    timeEnd:string;
-    day: Date;
-    booking_id:string;
-    user_id?: string;
-    yape?: number;
-    price?:number;
-  } | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
@@ -77,22 +68,9 @@ switch (day) {
     const selectedDay = reservation
     console.log("Day before formatting:", days[contador]); // Verifica la estructura de 'day'
     console.log("rservacion",selectedDay)
-    if (selectedDay && selectedDay.booking_details && selectedDay.status==="en espera" ) {
-      setModalDataE({
-        timeStart,
-        timeEnd,
-        day: days[contador],
-        booking_id:selectedDay.booking_details.id || null,
-        user_id: selectedDay.booking_details.id_user || "",
-        yape: selectedDay.booking_details.yape || 0,
-        price:selectedDay.booking_details.price || 0,
-
-      });
-      setIsModalOpenE(true);
-     
-      
-    }else
-    if (selectedDay && selectedDay.status==="disponible" ) {
+  
+   
+    if (selectedDay && selectedDay.status!=="disponible" ) {
 
       setModalData({
         timeStart,
@@ -118,10 +96,7 @@ switch (day) {
     setIsModalOpen(false);
     setModalData(null);
   };
-  const handleCloseModalE = () => {
-    setIsModalOpenE(false);
-    setModalDataE(null);
-  };
+ 
 
   const fetchDatos = async () => {
     setLoading(true);
@@ -184,61 +159,9 @@ switch (day) {
     handleCloseModal();
   };
 
-  const handleSaveReservationE = (data: { user_id: string; yape: number; price: number; }) => {
-    if (!modalDataE) return;
-  
-    const { timeStart, day } = modalDataE;
-    
-    // Verificar que 'day' sea un objeto Date válido
-    if (!(day instanceof Date)) {
-      console.error("La variable 'day' no es un objeto Date válido");
-      return;
-    }
-  
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.hour_range?.start === timeStart
-          ? {
-              ...reservation,
-              days: reservation.days.map((d) => {
-                const dayNameFormatted = format(new Date(d.day_name), "eeee", { locale: es });
-                const selectedDayFormatted = format(day, "eeee", { locale: es });
-  
-                // Comparar los días de la semana, no las fechas completas
-                return dayNameFormatted === selectedDayFormatted
-                  ? {
-                      ...d,
-                      booking_details: {
-                        id_user: data.user_id,
-                        yape: data.yape,
-                        price: data.price,
-                        id: Date.now(),
-                        user_name: "",
-                      },
-                    }
-                  : d;
-              }),
-            }
-          : reservation
-      )
-    );
-  
-    handleCloseModalE();
-  };
+ 
   
 
-  const getColorClass = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "disponible":
-        return "bg-white text-black";
-      case "reservado":
-        return "bg-red-800 text-white";
-      case "en espera":
-        return "bg-yellow-600 text-white";
-      default:
-        return "bg-gray-800 text-white";
-    }
-  };
 
 
   if (loading) 
@@ -264,19 +187,7 @@ switch (day) {
               </th>
             ))}
           </tr>
-          <tr>
-            <th className="w-[5%]"></th>
-            <th className="w-[5%] bg-[#5A6BA0] text-white">Detalle</th>
-            {days.map((day, index) => (
-              <th key={index} className="border px-4 py-2 text-xs bg-[#8D9EC1] text-white">
-                <div className="flex justify-between items-center w-full">
-                  <span>Reserva</span>
-                  <span>Yape</span>
-                  <span>Precio</span>
-                </div>
-              </th>
-            ))}
-          </tr>
+      
         </thead>
         <tbody>
           {reservations.map((reservation, index) => (
@@ -292,7 +203,7 @@ switch (day) {
                 return (
                   <td
                     key={dayIndex}
-                    className={`border px-4 py-2 text-xs ${getColorClass(status)}`}
+                    className={`border px-4 py-2 text-xs ${status}`}
                     onClick={() => {
                       // Buscar el día correspondiente dentro de reservation.days
                       const selectedDay = reservation.days.find(d => d.day_name === day.day_name);
@@ -306,13 +217,12 @@ switch (day) {
                     }}
                                       >
                     {day.booking_details ? (
-                      <div className="flex justify-between items-center w-full">
+                      <div className=" justify-between text-center w-full">
                         <span>{day.booking_details.user_name}</span>
-                        <span>{day.booking_details.yape}</span>
-                        <span>{day.booking_details.total}</span>
+                       
                       </div>
                     ) : (
-                      <div className="text-center">Disponible</div>
+                      <div className="text-center">...</div>
                     )}
                   </td>
                 );
@@ -338,24 +248,7 @@ switch (day) {
           }}
         />
       )}
-         {modalDataE &&isModalOpenE && (
-       
-       <ReservaEdit
-         field={field}
-         timeStart={modalDataE.timeStart}
-         timeEnd={modalDataE.timeEnd}
-         day={modalDataE.day}
-         isOpen={isModalOpenE}
-         onClose={handleCloseModalE}
-         onSave={handleSaveReservationE}
-          initialData={{
-            booking_id: modalDataE.booking_id,
-            user_id: modalDataE.user_id || "",
-            yape: modalDataE.yape || 0,
-            price:modalDataE.price || 0,
-          }}
-        />
-      )}
+        
     </div>
   );
 }

@@ -1,5 +1,31 @@
-export type DataItem = {
-    hour: string;
+export interface BookingDetails {
+    id: number;
+    id_user: string;
+    user_name: string;
+    yape: number;
+    price: number;
+    total?: number;
+  }
+  
+ export interface Day {
+    day_name: string;
+    status?: 'disponible' | 'reservado' | 'no disponible'; // Ajusta los estados posibles según sea necesario.
+    booking_details?: BookingDetails | null;
+  }
+  
+ export interface HourRange {
+    start: string; // Hora de inicio en formato de cadena, por ejemplo, "08:00 AM".
+    end: string;   // Hora de fin en formato de cadena, por ejemplo, "09:00 AM".
+  }
+  
+ export interface Reservation {
+    hour_range: HourRange;
+    days: Day[];
+  }
+  
+  
+
+    /*
     Lunes_user_name: string;
     Lunes_status: string;
     Lunes_yape: number;
@@ -28,4 +54,4 @@ export type DataItem = {
     Domingo_user_name: string;
     Domingo_yape: number;
     Domingo_total: number;
-}
+    */
