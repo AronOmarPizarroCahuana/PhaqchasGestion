@@ -1,52 +1,108 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useToast } from "@/components/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Toast, ToastAction } from "@/components/ui/toast";
-import { PublishedItem } from "@/app/Interface/annoucement"; // Importar el tipo
-
-import { AnnouncementForm } from "@/components/annoucementForm"; // Importar componente para el formulario
-import { PublishedList } from "@/components/annoucementTable"; // Importar componente para la lista de anuncios
+import { PublishedItem } from "@/app/Interface/annoucement"; 
+import { AnnouncementForm } from "@/components/annoucementForm"; 
+import { PublishedList } from "@/components/annoucementTable"; 
 
 export default function FormPage() {
-  const { toast } = useToast();
   const [publishedItems, setPublishedItems] = useState<PublishedItem[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Obtener los anuncios desde la API
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/annoucement")
+    // Detectar si la pantalla es pequeña
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768); // Para celulares
+    };
+    
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
+    
+    return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  useEffect(() => {
+    fetch("http://127.0.0.1:8000/api/announcement") 
       .then(response => response.json())
       .then(data => {
-        console.log(data); 
-        if (Array.isArray(data.data)) { // Accede a la propiedad 'data' que contiene el array
+        if (Array.isArray(data?.data)) { 
           setPublishedItems(data.data);
         } else {
           console.error("La respuesta de la API no contiene un array:", data);
-          setPublishedItems([]); // Establecer un array vacío en caso de error
+          setPublishedItems([]);
         }
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
-        setPublishedItems([]); // Establecer un array vacío en caso de error
+        setPublishedItems([]);
       });
   }, []);
-  
 
-  const addPublishedItem = (item: PublishedItem) => {
-    setPublishedItems([...publishedItems, item]);
+  const reloadAnnouncements = () => {
+    fetch("http://127.0.0.1:8000/api/announcement") 
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data?.data)) { 
+          setPublishedItems(data.data);
+        } else {
+          console.error("La respuesta de la API no contiene un array:", data);
+          setPublishedItems([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setPublishedItems([]);
+      });
   };
 
   return (
-    <div className="flex">
-      <div className="w-1/2 p-4">
-        <h1 className="text-2xl font-semibold mb-4 text-center">Generar anuncios</h1>
-        <AnnouncementForm addPublishedItem={addPublishedItem} />
+    <div className="flex flex-col md:flex-row">
+      <div className="w-full md:w-1/2 p-10">
+        <h1 className="text-2xl font-semibold mb-4 text-center font-inter text-[#7B7B7B] text-[32px]">Generar anuncios</h1>
+
+        {isMobile ? (
+          <>
+            <Button 
+              className="w-full bg-[#E1BC00] text-white py-2 px-4 rounded-md"
+              onClick={() => setIsModalOpen(true)}
+            >
+              + Crear Anuncio
+            </Button>
+
+            {/* Modal */}
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg w-11/12 max-w-lg shadow-lg relative">
+                  
+                  {/* Icono de Cerrar */}
+                  <button 
+                    className="absolute top-2 right-2 text-2xl text-gray-600"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    &times;
+                  </button>
+              
+                  <h2 className="text-xl font-bold mb-10">Nuevo Anuncio</h2>
+                  <AnnouncementForm reloadAnnouncements={reloadAnnouncements} />
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          // Si no es móvil, mostrar el formulario normalmente
+          <AnnouncementForm reloadAnnouncements={reloadAnnouncements} />
+        )}
       </div>
 
-      <div className="w-1/2 p-4 border-l border-gray-300">
-        <PublishedList publishedItems={publishedItems} /> 
-      </div>
+      <div className="w-full md:w-1/2 p-4 border-t md:border-l md:border-t-0 border-gray-300">
+  <div className="overflow-x-auto max-h-[calc(100vh-250px)] md:max-h-[calc(100vh-200px)]"> 
+    <PublishedList publishedItems={publishedItems} />
+  </div>
+</div>
+
+
     </div>
   );
 }

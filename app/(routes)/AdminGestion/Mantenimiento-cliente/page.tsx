@@ -3,7 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Table, TableRow, TableCell, TableBody ,TableHeader} from '@/components/ui/table';
-
+import Image from "next/image";
 
 const clientes = [
   {
@@ -52,7 +52,7 @@ const ClientesPage = () => {
           {clientes.map((cliente, index) => (
             <TableRow key={index} className="border">
               <TableCell className="border p-4 flex items-center space-x-2">
-                <img
+                <Image
                   src={cliente.imagen}
                   alt="Profile"
                   className="w-10 h-10 rounded-full"

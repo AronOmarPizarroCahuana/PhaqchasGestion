@@ -3,15 +3,27 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Sport } from '../../app/Interface/sport';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface ReservaMProps {
   field: string;
   timeStart: string; // Este es el tiempo, por ejemplo, "08:00 AM - 09:00 AM"
   timeEnd: string;
-  day: any;
+  day: Date;
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: { start_time: string, end_time: string, booking_date: string, user_id: string, yape: number, price: number }) => void;
+  onSave:  (data: {
+    user_id: string;
+    yape: number;
+    price: number;
+    field_id: string;
+    booking_date: string;
+    start_time: string;
+    end_time: string;
+    sport_id: number;
+    total:number;
+    user_name:string
+  }) => void
   initialData: {
     user_id: string;
     yape: number;
@@ -38,20 +50,23 @@ export default function ReservaM({
   const [user_id, setUser_id] = useState(initialData.user_id);
   const [yape, setYape] = useState(initialData.yape);
   const [sports, setSports] = useState<Sport[]>([]);
-  const [status, setStatus] = useState<string>("en espera"); 
   const [total, setTotal] = useState(0); // Estado para el total
-
-  const [selectedSportId, setSelectedSportId] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null); // Estado para manejar errores
+  const formatHour = (time: string | null) => {
+    if (!time) return null;
+  
+    // Convertir a formato 24h
+    const date = new Date(`2000-01-01 ${time}`);
+    return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
+  };
+    const [selectedSportId, setSelectedSportId] = useState<number | null>(null);
   const [price, setPrice] = useState(0);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [filteredCustomers, setFilteredCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [phoneSearch, setPhoneSearch] = useState('');
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-  const formatTime = (time: string) => {
-    const date = new Date('1970-01-01 ' + time);  // Usar una fecha arbitraria para convertir la hora
-    return date.toTimeString().substring(0, 5);   // Extraer la hora en formato 24 horas (HH:mm)
-  };
+ 
   // Fetch customers
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -83,8 +98,7 @@ export default function ReservaM({
       const response = await fetch(`http://127.0.0.1:8000/api/field/${field}`);
       const data = await response.json();
       if (data?.data?.field) {
-        const fieldData = data.data.field;
-        const priceForTimeSlot = getPriceForTimeSlot(fieldData, timeStart);
+        console.error("Existe", data);
       } else {
         console.error("Field data is not valid:", data);
       }
@@ -162,47 +176,46 @@ export default function ReservaM({
 
   const handleSubmit = async () => {
     if (yape < 0) {
-      alert('El monto de Yape no puede ser negativo.');
+      setError('El monto de Yape no puede ser negativo.');
       return;
     }
-
+const start_time=formatHour(timeStart)
+const end_time=formatHour(timeEnd)
 
     const requestData = {
       user_id: user_id,
-      field_id: field, // Assuming field_id is 3
+      field_id: field,
       booking_date: day.toISOString().split('T')[0],
-      start_time: formatTime(timeStart),
-      end_time: formatTime(timeEnd),
+      start_time: start_time??"",
+      end_time: end_time ??"",
       price: price,
       yape: yape,
-      sport_id: selectedSportId ?? 1, // Using selected sport id
+      sport_id: selectedSportId ?? 1,
+      total:price+yape,
+      user_name:selectedCustomer?.name ?? ''
     };
-
-    console.log('Datos que se enviarán a la API:', requestData);
 
     try {
       const response = await fetch('http://127.0.0.1:8000/api/booking', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'application/json'
         },
         body: JSON.stringify(requestData),
       });
-
+ 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(`Error: ${response.statusText}, Details: ${JSON.stringify(errorData)}`);
+        setError(`Error al guardar la reserva: ${errorData.message || 'Intente nuevamente'}`);
+        return;
       }
-
-      const data = await response.json();
-      console.log('Reserva guardada:', data);
-      alert('Reserva guardada correctamente');
-      onSave(requestData); // Llamada al callback con los datos actualizados
-
+      console.log(requestData)
+      onSave(requestData)
       onClose();
     } catch (error) {
-      console.error('Error al hacer la reserva:', error);
-      alert('Hubo un problema al guardar la reserva. Por favor, intente nuevamente.');
+      console.log(requestData)
+      console.log(`Hubo un problema: ${error}`);
     }
   };
 
@@ -227,7 +240,6 @@ export default function ReservaM({
               value={phoneSearch}
               onChange={handlePhoneSearch}
               className="mt-1 w-full p-2 border border-gray-300 rounded "
-              placeholder="Ingresa el número"
             />
             {phoneSearch && !loading && filteredCustomers.length > 0 && (
               <ul className="absolute top-full left-0 right-0 max-h-40 overflow-auto border bg-white mt-1 z-50">
@@ -242,8 +254,7 @@ export default function ReservaM({
                 ))}
               </ul>
             )}
-            {loading && <p className="text-sm text-gray-500 mt-2">Cargando clientes...</p>}
-          </div>
+       </div>
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -299,7 +310,13 @@ export default function ReservaM({
             </select>
           </div>
           </div>
-       
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
 
           <div className="flex justify-end">
             <Button onClick={onClose} className="mr-4">Cerrar</Button>

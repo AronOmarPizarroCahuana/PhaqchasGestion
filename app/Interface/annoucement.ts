@@ -3,6 +3,8 @@ export interface PublishedItem {
     title: string;
     description: string;
     image: File | null;  // Cambiar de string a File
-    status: boolean;
+    status?: boolean;
+    imageUrl?: string; // Agregar esta línea
+
   }
   

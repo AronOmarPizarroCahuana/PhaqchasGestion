@@ -1,4 +1,3 @@
-'use client';
 import React, { useEffect, useState } from "react";
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
@@ -6,10 +5,10 @@ import { Reservation, Day } from './Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
-import { Skeleton } from "@/components/ui/skeleton";
+
 interface TablaProps {
   field: string;
-  currentWeekStart: any;
+  currentWeekStart: Date;
   startDate: string;
   endDate: string;
   id: string;
@@ -36,19 +35,32 @@ export default function Tabla({
     timeStart: string;
     timeEnd:string;
     day: Date;
-    booking_id:string;
+    booking_id:number;
     user_id?: string;
     yape?: number;
     price?:number;
   } | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [Daysreservations, setDayReservations] = useState<Day[]>([]);
-
+  
+  const convertTo24HourFormat = (time: string) => {
+    const [hour, minutePart] = time.split(':');
+    const [minute, ampm] = minutePart.trim().split(' ');
+  
+    let hour24 = parseInt(hour, 10);
+    if (ampm === 'PM' && hour24 !== 12) {
+      hour24 += 12;
+    } else if (ampm === 'AM' && hour24 === 12) {
+      hour24 = 0; // 12 AM is midnight (00:00)
+    }
+  
+    return `${hour24.toString().padStart(2, '0')}:${minute.padStart(2, '0')}`;
+  };
+  
   const days = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
-  const handleCellClick = (timeStart: string,timeEnd:string, day: string, reservation: any) => {
+  const handleCellClick = (timeStart: string,timeEnd:string, day: string, reservation: Day) => {
     let contador = 0;
 
 switch (day) {
@@ -77,19 +89,19 @@ switch (day) {
     const selectedDay = reservation
     console.log("Day before formatting:", days[contador]); // Verifica la estructura de 'day'
     console.log("rservacion",selectedDay)
-    if (selectedDay && selectedDay.booking_details && selectedDay.status==="en espera" ) {
+    if (selectedDay && selectedDay.booking_details && selectedDay.status==="reservado" ) {
       setModalDataE({
         timeStart,
         timeEnd,
         day: days[contador],
-        booking_id:selectedDay.booking_details.id || null,
+        booking_id:selectedDay.booking_details.id ,
         user_id: selectedDay.booking_details.id_user || "",
         yape: selectedDay.booking_details.yape || 0,
         price:selectedDay.booking_details.price || 0,
 
       });
       setIsModalOpenE(true);
-     
+     console.log(Daysreservations)
       
     }else
     if (selectedDay && selectedDay.status==="disponible" ) {
@@ -135,9 +147,9 @@ switch (day) {
       const { data } = await response.json();
       setReservations(data);
       setDayReservations(data.da); // Ajusta 'data.da' según la estructura correcta
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
+    } catch (err) {
+console.log(err)   
+ } finally {
       setLoading(false);
     }
   };
@@ -146,44 +158,75 @@ switch (day) {
     fetchDatos();
   }, [startDate, endDate, id]);
 
-  const handleSaveReservation = (data: { user_id: string; yape: number; price: number; }) => {
-    if (!modalData) return;
+  const handleSaveReservation = async (data: { 
+    user_id: string;
+    yape: number;
+    price: number;
+    field_id: string;
+    booking_date: string;
+    start_time: string;
+    end_time: string;
+    sport_id: number;
+    total: number;
+    user_name: string;
+}) => {
+    if (!modalData) {
+        console.error("❌ Error: modalData es undefined o null");
+        return;
+    }
 
     const { timeStart, day } = modalData;
 
-       // Verificar que 'day' sea un objeto Date válido
-       if (!(day instanceof Date)) {
-        console.error("La variable 'day' no es un objeto Date válido");
+    // Convertir tiempos
+    const formattedStartTime = convertTo24HourFormat(timeStart);
+
+    if (!(day instanceof Date)) {
+        console.error("❌ Error: 'day' no es un objeto Date válido");
         return;
-      }
-    
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.hour_range?.start === timeStart
-          ? {
-              ...reservation,
-              days: reservation.days.map((d) =>
-                format(new Date(d.day_name), "eeee", { locale: es }) === format(day, "eeee", { locale: es })
-                  ? {
-                      ...d,
-                      booking_details: {
-                        id_user: data.user_id,
-                        yape: data.yape,
-                        price: data.price,
-                        id: Date.now(),
-                        user_name: "",
-                      },
+    }
+
+    // ✅ Actualiza las reservas clonando los datos
+    setReservations((prev) => {
+        const updatedReservations = prev.map((reservation) => {
+            if (reservation.hour_range?.start === formattedStartTime) {
+                const newDays = reservation.days.map((d) => {
+                    if (format(new Date(d.day_name), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")) {
+                        return {
+                            ...d,
+                            booking_details: {
+                                id: Date.now(),
+                                id_user: data.user_id,
+                                user_name: data.user_name,
+                                yape: data.yape,
+                                price: data.price,
+                                total: data.total,
+                            },
+                        };
                     }
-                  : d
-              ),
+                    return d;
+                });
+
+                return { ...reservation, days: [...newDays] };
             }
-          : reservation
-      )
-    );
+            return reservation;
+        });
 
+        return [...updatedReservations]; // Forzar re-render
+    });
+
+    // 🔄 Forzar actualización llamando nuevamente a fetchDatos
+    await fetchDatos();
+
+    console.log("✅ La tabla se ha actualizado correctamente.");
     handleCloseModal();
-  };
+};
 
+// 🔄 Verifica si el estado se está actualizando correctamente
+useEffect(() => {
+    console.log("🔄 Estado actualizado:", reservations);
+}, [reservations]);
+
+  
   const handleSaveReservationE = (data: { user_id: string; yape: number; price: number; }) => {
     if (!modalDataE) return;
   
@@ -248,7 +291,7 @@ switch (day) {
   
   
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto bg-neutra">
       <Table className="table-fixed w-full text-sm border-separate min-w-[1500px]">
         <thead className="bg-gray-100">
           <tr>
@@ -281,9 +324,9 @@ switch (day) {
         <tbody>
           {reservations.map((reservation, index) => (
             <tr key={index}>
-              <td className="rotate-0 border text-center">CAMPO {field}</td>
+              <td className="rotate-0 border text-[12px] font-bold font-inter text-center bg-white text-[#454545]">CAMPO {field}</td>
               {reservation.hour_range && (
-                <td className="border text-center">
+                <td className="border text-center text-[13px] font-semibold font-inter  bg-white text-[#454545]">
                   {reservation.hour_range.start} - {reservation.hour_range.end}
                 </td>
               )}
@@ -309,7 +352,7 @@ switch (day) {
                       <div className="flex justify-between items-center w-full">
                         <span>{day.booking_details.user_name}</span>
                         <span>{day.booking_details.yape}</span>
-                        <span>{day.booking_details.total}</span>
+                        <span>{day.booking_details.price}</span>
                       </div>
                     ) : (
                       <div className="text-center">Disponible</div>

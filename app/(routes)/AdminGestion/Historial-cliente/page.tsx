@@ -1,11 +1,11 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import TopClientes from '@/components/Topcliente/Topcliente';
 import HistorialClientes from '@/components/Historialcliente/Historialcliente';
 
 const Home = () => {
-  const [topClientes, setTopClientes] = useState([]);
+ /* const [topClientes, setTopClientes] = useState([]);
   const [historialClientes, setHistorialClientes] = useState([]);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const Home = () => {
     fetch('/path-to-your/historialClientes.json')
       .then((response) => response.json())
       .then((data) => setHistorialClientes(data));
-  }, []);
+  }, []);*/
 
   return (
     <div className="p-8">

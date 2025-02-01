@@ -4,12 +4,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PublishedItem } from "@/app/Interface/annoucement";
+import Image from "next/image";
 
 interface AnnouncementFormProps {
-  addPublishedItem: (item: PublishedItem) => void;
+  reloadAnnouncements: () => void; // Cambiar addPublishedItem por reloadAnnouncements
 }
 
-export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
+export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps) {
   const [formData, setFormData] = useState<PublishedItem>({
     title: "",
     description: "",
@@ -27,19 +28,22 @@ export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
     if (formData.image) {
       data.append("image", formData.image);
     }
-    data.append("status", formData.status.toString());
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/annoucement", {
+      const response = await fetch("http://127.0.0.1:8000/api/announcement", {
         method: "POST",
         body: data,
       });
 
       if (response.ok) {
         const result = await response.json();
-        const imageUrl = result.image_url; // Asegúrate de que el backend devuelva `image_url`
+        const imageUrl = result.image_url;
 
-        addPublishedItem({ ...formData, id: result.id });
+        // Recargar anuncios después de publicar
+        reloadAnnouncements(); // Llamar a la función para recargar la tabla
+
+        console.log("Anuncio enviado:", { ...formData, id: result.id, imageUrl });
+
         setFormData({ title: "", description: "", image: null, status: true });
         setUploadedImageUrl(imageUrl);
         alert("Anuncio publicado con éxito.");
@@ -81,8 +85,7 @@ export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 p-4 border rounded-lg">
-      
+    <form onSubmit={handleSubmit} className="space-y-10 p-4 ">
       <div>
         <Label className="block text-sm font-medium">Título</Label>
         <Input
@@ -99,7 +102,7 @@ export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
       <div>
         <Label className="block text-sm font-medium">Subir Imagen</Label>
         <div
-          className="w-full h-40 p-4 border border-gray-300 rounded border-dashed flex items-center justify-center cursor-pointer"
+          className="w-full h-64 p-4 border border-[#C0BCBC]  rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
           onClick={() => document.getElementById("fileInput")?.click()}
         >
           <input
@@ -111,23 +114,22 @@ export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
           />
           {!formData.image ? (
             <div className="flex flex-col items-center justify-center text-gray-500">
-              <img
+              <Image
                 src="/subir.png"
                 alt="Image Icon"
-                className="w-16 h-16 mb-2"
-              />
+                width={70}
+                height={70}              />
               <p>Haz clic o arrastra una imagen aquí</p>
             </div>
           ) : (
             <div className="flex flex-col items-center justify-center">
-              <img
+              <Image
                 src={URL.createObjectURL(formData.image)}
                 alt="Uploaded"
-                className="w-16 h-16 mb-2 object-cover"
-              />
+                width={140}
+                height={140}                />
               <Button
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={() => {
                   handleRemoveFile();
                 }}
                 size="icon"
@@ -140,45 +142,29 @@ export function AnnouncementForm({ addPublishedItem }: AnnouncementFormProps) {
         {uploadedImageUrl && (
           <div className="mt-4">
             <p>Imagen subida:</p>
-            <img
+            <Image
               src={uploadedImageUrl}
               alt="Uploaded URL"
-              className="w-32 h-32 object-cover border rounded"
-            />
+              width={70}
+              height={70}              />
           </div>
         )}
       </div>
 
       <div>
-        <Label className="block text-sm font-medium">Descripción</Label>
+        <Label className="block text-sm font-medium ">Descripción</Label>
         <Textarea
           name="description"
           value={formData.description}
           onChange={handleChange}
-          className="w-full p-2 border border-gray-300 rounded"
+          className="w-full p-2 border border-gray-300 rounded h-32"
           rows={4}
           placeholder="Escribe la descripción del anuncio"
           required
         />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <input
-          type="checkbox"
-          name="status"
-          checked={formData.status}
-          onChange={() =>
-            setFormData({ ...formData, status: !formData.status })
-          }
-          id="status"
-          className="w-4 h-4 border-gray-300 rounded"
-        />
-        <Label htmlFor="status" className="text-sm font-medium">
-          Activo
-        </Label>
-      </div>
-
-      <Button type="submit" className="w-full bg-blue-600 text-white hover:bg-blue-700">
+      <Button type="submit" className="w-full bg-[#E1BC00] text-white hover:bg-[#9b8a38] font-bold">
         Publicar
       </Button>
     </form>

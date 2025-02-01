@@ -1,10 +1,9 @@
 
-import Booking from "@/components/Booking/Booking";
 
 export default function Home() {
   return (
     <div className="min-h-screen flex flex-col">
-      <Booking></Booking>
+      <h2>Hola</h2>
     </div>
   );
 }

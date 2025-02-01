@@ -8,7 +8,7 @@ interface ReservaMProps {
   field: string;
   timeStart: string;
   timeEnd: string;
-  day: any;
+  day: Date;
   isOpen: boolean;
   onClose: () => void;
   onSave: (data: {
@@ -22,7 +22,7 @@ interface ReservaMProps {
     sport_id: number;
   }) => void;
   initialData: {
-    booking_id:string;
+    booking_id:number;
     user_id: string;
     yape: number;
     price:number;
@@ -43,9 +43,8 @@ export default function ReservaM({
   timeStart,
   timeEnd,
   day,
-  isOpen,
   onClose,
-  onSave,
+  
   initialData,
 }: ReservaMProps) {
   const [user_id, setUser_id] = useState(initialData.user_id || '');
@@ -53,7 +52,7 @@ export default function ReservaM({
   const [sports, setSports] = useState<Sport[]>([]);
   const [total, setTotal] = useState(0);
   const [price, setPrice] = useState(initialData.price);
-  const [booking_id, setbooking_id] = useState(initialData.booking_id);
+  //const [booking_id, setbooking_id] = useState(initialData.booking_id);
   const formatTime = (time: string) => {
     const date = new Date('1970-01-01 ' + time);  // Usar una fecha arbitraria para convertir la hora
     return date.toTimeString().substring(0, 5);   // Extraer la hora en formato 24 horas (HH:mm)
@@ -148,11 +147,9 @@ export default function ReservaM({
       sport_id: selectedSportId,
     };
   
-    console.log(requestData);
-  
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/booking/${booking_id}`, {
-        method: 'PATCH', // Usamos PUT para actualizar
+      const response = await fetch(`http://127.0.0.1:8000/api/booking/${initialData.booking_id}`, { // Usa initialData.booking_id
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -160,20 +157,19 @@ export default function ReservaM({
       });
   
       if (!response.ok) {
-        const errorText = await response.text(); // Leer la respuesta de error
-        console.error('Error response:', errorText); // Imprime el error
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
         throw new Error('Error al guardar la reserva');
       }
-      console.log(requestData);
-      console.log(booking_id);
-
+  
       alert('Reserva guardada correctamente');
-      onClose(); // Cerrar el modal después de guardar
+      onClose(); 
     } catch (error) {
       console.error('Error:', error);
       alert('Hubo un problema al guardar la reserva.');
     }
   };
+  
   
   const formatDateToString = (date: Date) => {
     return date.toLocaleDateString('en-CA');
@@ -181,7 +177,7 @@ export default function ReservaM({
 
   const deleteReserva = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/booking/${booking_id}`, {
+      const response = await fetch(`http://127.0.0.1:8000/api/booking/${initialData.booking_id}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

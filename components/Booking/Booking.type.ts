@@ -1,4 +1,4 @@
 export type BookingProps = {
-    id: any,
+    id: string,
     field: string
 }

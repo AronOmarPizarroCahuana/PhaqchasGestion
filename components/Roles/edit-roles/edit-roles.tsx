@@ -2,10 +2,26 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+interface User {
+  id: number;
+  name: string;
+  surname: string;
+  phone: string;
+  dni: string;
+  rol_id: number;
+}
+
+interface FormData {
+  name: string;
+  surname: string;
+  phone: string;
+  dni: string;
+  rol: string;  // Aquí puedes ajustar los valores según tus necesidades
+}
 
 interface EditUserModalProps {
-  user: any;
-  onEdit: (id: number, formData: any) => void;
+  user: User;
+  onEdit: (id: number, formData: FormData) => void;
 }
 
 const EditUserModal = ({ user, onEdit }: EditUserModalProps) => {

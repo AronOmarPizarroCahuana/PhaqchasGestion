@@ -3,7 +3,7 @@ import { PublishedItem } from "@/app/Interface/annoucement";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
 import { Dialog } from "@/components/ui/dialog"; // Usamos Dialog de shadcn
 import { Button } from "@/components/ui/button";
-import { Item } from "@radix-ui/react-select";
+import Image from "next/image";
 
 interface PublishedListProps {
   publishedItems: PublishedItem[];
@@ -18,50 +18,70 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
     setItems(publishedItems);
   }, [publishedItems]);
 
-
-
-
-  const handleDelete = (id: string | undefined) => {
-    fetch(`http://127.0.0.1:8000/api/annoucement/${id}`, {
-      method: "DELETE",
-    }).then(response => {
-      if (response.ok) {
-        setItems(items.filter(item => item.id !== id)); // Eliminar el anuncio de la lista
-      }
-    });
-  };
+ 
 
   const handleEdit = (item: PublishedItem) => {
     setEditItem(item); // Establecer el ítem a editar
     setShowModal(true); // Mostrar el modal de edición
   };
 
-  const handleStatusToggle = (id: string | undefined) => {
-    fetch(`http://127.0.0.1:8000/api/annoucement/updateStatus/${id}`, {
-      method: "GET",
-    }).then(response => {
-      if (response.ok) {
-       console.log("SE actualizo el status")
-       
-      }
-    });
+  const handleDelete = (id: string | undefined) => {
+    if (!id) return; 
+
+    fetch(`http://127.0.0.1:8000/api/announcement/${id}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (response.ok) {
+          setItems(items.filter((item) => item.id !== id)); // Eliminar el anuncio de la lista
+        } else {
+          console.error("Error al eliminar el anuncio");
+        }
+      })
+      .catch((error) => console.error("Error al realizar la solicitud DELETE:", error));
+  };
+
+  const handleStatusToggle = async (id: string | undefined) => {
+    if (!id) return;
+
+    try {
+      const response = await fetch(`http://127.0.0.1:8000/api/announcement/updateStatus/${id}`, {
+        method: "GET",
+      });
+
+      if (!response.ok) throw new Error("Error al actualizar el estado");
+
+      setItems((prevItems) =>
+        prevItems.map((item) =>
+          item.id === id ? { ...item, status: !item.status } : item
+        )
+      );
+    } catch (error) {
+      console.error("Error al actualizar el estado:", error);
+    }
   };
 
   const handleSubmit = (updatedItem: PublishedItem) => {
-    fetch(`http://127.0.0.1:8000/api/annoucement/${updatedItem.id}`, {
-      method: "PUT", // Usamos PUT para actualizar
+    fetch(`http://127.0.0.1:8000/api/announcement/${updatedItem.id}`, {
+      method: "PUT", 
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(updatedItem),
-    }).then(response => {
-      if (response.ok) {
-        setItems(items.map(item => 
-          item.id === updatedItem.id ? updatedItem : item
-        ));
-        setShowModal(false); // Cerrar el modal después de actualizar
-      }
-    });
+    })
+      .then((response) => {
+        if (response.ok) {
+          setItems(
+            items.map((item) =>
+              item.id === updatedItem.id ? updatedItem : item
+            )
+          );
+          setShowModal(false); // Cerrar el modal después de actualizar
+        } else {
+          console.error("Error al actualizar el anuncio");
+        }
+      })
+      .catch((error) => console.error("Error al realizar la solicitud PUT:", error));
   };
 
   return (
@@ -86,7 +106,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
                     id="title"
                     value={editItem.title}
                     onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
-                    className="w-full mt-1 p-2 border rounded"
+                    className="w-full mt-1 p-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
                 <div className="mb-4">
@@ -95,36 +115,20 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
                     id="description"
                     value={editItem.description}
                     onChange={(e) => setEditItem({ ...editItem, description: e.target.value })}
-                    className="w-full mt-1 p-2 border rounded"
+                    className="w-full mt-1 p-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
-                <div className="mb-4" 
-                       
-
-                >
-                  <label htmlFor="status" className="block text-sm font-medium">Estado</label>
-                  <select
-                    id="status"
-                    value={editItem.status ? "Activo" : "Inactivo"}
-                    onChange={(e) => setEditItem({ ...editItem, status: e.target.value === "Activo" })}
-                    className="w-full mt-1 p-2 border rounded"
-                  >
-                    <option value="Activo">Activo</option>
-                    <option value="Inactivo">Inactivo</option>
-                  </select>
-                </div>
-
                 <div className="flex justify-between">
                   <button
                     type="submit"
-                    className="bg-blue-500 text-white py-2 px-4 rounded"
+                    className="bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     Guardar
                   </button>
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="bg-red-500 text-white py-2 px-4 rounded"
+                    className="bg-red-500 text-white py-2 px-4 rounded-md hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-500"
                   >
                     Cancelar
                   </button>
@@ -136,52 +140,57 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
       )}
 
       {/* Tabla */}
-      <table className="w-full table-fixed">
-        <thead>
-          <tr>
-            <th className="px-4 py-2 border-b">Imagen</th>
-            <th className="px-4 py-2 border-b">Título</th>
-            <th className="px-4 py-2 border-b">Descripción</th>
-            <th className="px-4 py-2 border-b">Estado</th>
-            <th className="px-4 py-2 border-b">Acción</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((item) => (
-            <tr key={item.id}>
-             <td className="px-4 py-2 border-b mg-5 flex items-center justify-center">
-  {item.image ? (
-    <img
-      src={`http://127.0.0.1:8000${item.image}`}
-      alt={item.title}
-      className="w-16 h-16 object-cover"
-    />
-  ) : (
-    <span>No Image</span>
-  )}
-</td>
-              <td className="px-4 py-2 border-b text-center">{item.title}</td>
-              <td className="px-4 py-2 border-b text-center">{item.description}</td>
-              <td className="px-4 py-2 border-b text-center">
-                <Button
-                  className={`px-4 py-2 rounded text-white ${item.status ? "bg-green-400" : "bg-gray-400"}`}
-                  onClick={() => handleStatusToggle(item.id )}
-                >
-                  {item.status ? "Activo" : "Inactivo"}
-                </Button>
-              </td>
-              <td className="px-4 py-2 border-b gap-2 text-center">
-                <button onClick={() => handleEdit(item)} title="Editar">
-                  <FaEdit className="text-blue-500" />
-                </button>
-                <button onClick={() => handleDelete(item.id)} title="Eliminar">
-                  <FaTrashAlt className="text-red-500" />
-                </button>
-              </td>
+      <div className="overflow-x-auto">
+        <table className="min-w-full table-auto border-collapse bg-white rounded-lg shadow-md">
+          <thead className="bg-gray-100 text-sm text-gray-600">
+            <tr>
+              <th className="px-4 py-2 border-b">Imagen</th>
+              <th className="px-4 py-2 border-b">Título</th>
+              <th className="px-4 py-2 border-b">Descripción</th>
+              <th className="px-4 py-2 border-b">Estado</th>
+              <th className="px-4 py-2 border-b">Acción</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="text-sm text-gray-700">
+            {items.map((item) => (
+              <tr key={`${item.id}-${item.title}`} className="hover:bg-gray-50">
+                <td className="px-4 py-2 border-b text-center">
+                  {item.image ? (
+                    <Image
+                      src={`http://127.0.0.1:8000${item.image}`}
+                      alt={item.title || "Imagen del anuncio"}
+                      width={70}
+                      height={70}
+                      priority
+                    />
+                  ) : (
+                    <span>No Image</span>
+                  )}
+                </td>
+
+                <td className="px-4 py-2 border-b text-center">{item.title}</td>
+                <td className="px-4 py-2 border-b text-center">{item.description}</td>
+                <td className="px-4 py-2 border-b text-center">
+                  <Button
+                    className={`px-4 py-2 rounded text-white ${item.status ? "bg-green-400" : "bg-gray-400"}`}
+                    onClick={() => handleStatusToggle(item.id)}
+                  >
+                    {item.status ? "Activo" : "Inactivo"}
+                  </Button>
+                </td>
+                <td className="px-4 py-2 border-b text-center">
+                  <button onClick={() => handleEdit(item)} title="Editar">
+                    <FaEdit className="text-blue-500 hover:text-blue-700" />
+                  </button>
+                  <button onClick={() => handleDelete(item.id)} title="Eliminar" className="ml-2">
+                    <FaTrashAlt className="text-red-500 hover:text-red-700" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </>
   );
 }

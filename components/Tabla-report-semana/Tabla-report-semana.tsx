@@ -5,11 +5,10 @@ import { es } from "date-fns/locale";
 import { Reservation, Day } from '../Tabla/Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
-import ReservaEdit from "../ReservaEdit/ReservaEdit";
-import { Skeleton } from "@/components/ui/skeleton";
+
 interface TablaProps {
   field: string;
-  currentWeekStart: any;
+  currentWeekStart: Date;
   startDate: string;
   endDate: string;
   id: string;
@@ -33,13 +32,11 @@ export default function Tabla({
 
   
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [reservations, setReservations] = useState<Reservation[]>([]);
-  const [Daysreservations, setDayReservations] = useState<Day[]>([]);
 
   const days = Array.from({ length: 7 }, (_, i) => addDays(currentWeekStart, i));
 
-  const handleCellClick = (timeStart: string,timeEnd:string, day: string, reservation: any) => {
+  const handleCellClick = (timeStart: string,timeEnd:string, day: string, reservation: Day) => {
     let contador = 0;
 
 switch (day) {
@@ -109,10 +106,10 @@ switch (day) {
       }
       const { data } = await response.json();
       setReservations(data);
-      setDayReservations(data.da); // Ajusta 'data.da' según la estructura correcta
-    } catch (err: any) {
-      setError(err.message);
-    } finally {
+      console.log(data)
+    } catch (err) {
+console.log(err)   
+ } finally {
       setLoading(false);
     }
   };
@@ -123,43 +120,57 @@ switch (day) {
 
   const handleSaveReservation = (data: { user_id: string; yape: number; price: number; }) => {
     if (!modalData) return;
-
+  
     const { timeStart, day } = modalData;
-
-       // Verificar que 'day' sea un objeto Date válido
-       if (!(day instanceof Date)) {
-        console.error("La variable 'day' no es un objeto Date válido");
-        return;
-      }
-    
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.hour_range?.start === timeStart
-          ? {
-              ...reservation,
-              days: reservation.days.map((d) =>
-                format(new Date(d.day_name), "eeee", { locale: es }) === format(day, "eeee", { locale: es })
-                  ? {
-                      ...d,
-                      booking_details: {
-                        id_user: data.user_id,
-                        yape: data.yape,
-                        price: data.price,
-                        id: Date.now(),
-                        user_name: "",
-                      },
-                    }
-                  : d
-              ),
+  
+    // Verificar que 'day' sea un objeto Date válido
+    if (!(day instanceof Date)) {
+      console.error("La variable 'day' no es un objeto Date válido");
+      return;
+    }
+  
+    console.log("Guardando reserva con los siguientes datos:", data, modalData);
+  
+    setReservations((prev) => {
+      const updatedReservations = prev.map((reservation) => {
+        if (reservation.hour_range?.start === timeStart) {
+          console.log("Reserva encontrada, actualizando detalles");
+  
+          const updatedDays = reservation.days.map((d) => {
+            const formattedDay = format(new Date(d.day_name), "eeee", { locale: es });
+            const selectedDayFormatted = format(day, "eeee", { locale: es });
+  
+            console.log(`Comparando días: ${formattedDay} === ${selectedDayFormatted}`);
+  
+            if (formattedDay === selectedDayFormatted) {
+              console.log("Actualizando detalles de la reserva...");
+              return {
+                ...d,
+                booking_details: {
+                  id_user: data.user_id,
+                  yape: data.yape,
+                  price: data.price,
+                  id: Date.now(), // Usa un UUID si necesitas algo más único
+                  user_name: "",
+               
+                },
+              };
             }
-          : reservation
-      )
-    );
-
+            return d;
+          });
+  
+          return { ...reservation, days: updatedDays };
+        }
+  
+        return reservation;
+      });
+  
+      console.log("Reservas actualizadas:", updatedReservations); // Verifica la actualización
+      return updatedReservations;
+    });
+  
     handleCloseModal();
   };
-
- 
   
 
 
@@ -190,6 +201,7 @@ switch (day) {
       
         </thead>
         <tbody>
+        
           {reservations.map((reservation, index) => (
             <tr key={index}>
               <td className="rotate-0 border text-center">CAMPO {field}</td>
@@ -205,17 +217,15 @@ switch (day) {
                     key={dayIndex}
                     className={`border px-4 py-2 text-xs ${status}`}
                     onClick={() => {
-                      // Buscar el día correspondiente dentro de reservation.days
                       const selectedDay = reservation.days.find(d => d.day_name === day.day_name);
 
                       if (selectedDay) {
-                        // Llamar a handleCellClick pasando el timeSlot, el día y la información del día seleccionado
                         handleCellClick(reservation.hour_range.start,reservation.hour_range.end, day.day_name, selectedDay);
                       } else {
                         console.log("No se encontró el día correspondiente en reservation.days");
                       }
-                    }}
-                                      >
+                    }}>
+                      
                     {day.booking_details ? (
                       <div className=" justify-between text-center w-full">
                         <span>{day.booking_details.user_name}</span>
@@ -226,10 +236,26 @@ switch (day) {
                     )}
                   </td>
                 );
-              })}
-            </tr>
-          ))}
+
+              }
+              )}
+             
+                        </tr>
+          ))
+          }
+          <th></th>
+          <th className="bg-cyan-600 text-white">Total</th>
+          {days.map((day) => (
+              <th
+                key={day.toISOString()}
+                className="border p-3 text-center bg-cyan-600 text-white"
+              >
+                <div> </div>
+             
+              </th>
+            ))}
         </tbody>
+        
       </Table>
 
       {modalData && isModalOpen && (
