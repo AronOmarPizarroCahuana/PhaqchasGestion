@@ -1,15 +1,16 @@
 export interface BookingDetails {
     id: number;
     id_user: string;
-    user_name: string;
+    user_name?: string;
     yape: number;
     price: number;
     total?: number;
+    id_sport?:string;
   }
   
  export interface Day {
     day_name: string;
-    status?: 'disponible' | 'reservado' | 'no disponible'; // Ajusta los estados posibles según sea necesario.
+    status?: 'disponible' | 'reservado' | 'completado' | 'en espera'; // Ajusta los estados posibles según sea necesario.
     booking_details?: BookingDetails | null;
   }
   

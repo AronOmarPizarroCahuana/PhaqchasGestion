@@ -3,7 +3,7 @@ import { Dialog } from "@/components/ui/dialog";
 import { Input } from '../ui/input';
 import { Button } from '../ui/button';
 import { Sport } from '../../app/Interface/sport';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {API_URL} from "../../config";
 
 interface ReservaMProps {
   field: string;
@@ -22,11 +22,11 @@ interface ReservaMProps {
     end_time: string;
     sport_id: number;
     total:number;
-    user_name:string
   }) => void
   initialData: {
     user_id: string;
     yape: number;
+    sport_id:string;
   };
 }
 
@@ -51,14 +51,12 @@ export default function ReservaM({
   const [yape, setYape] = useState(initialData.yape);
   const [sports, setSports] = useState<Sport[]>([]);
   const [total, setTotal] = useState(0); // Estado para el total
-  const [error, setError] = useState<string | null>(null); // Estado para manejar errores
-  const formatHour = (time: string | null) => {
-    if (!time) return null;
-  
-    // Convertir a formato 24h
-    const date = new Date(`2000-01-01 ${time}`);
-    return date.toLocaleTimeString("es-ES", { hour: "2-digit", minute: "2-digit", hour12: false });
+
+  const formatTime = (time: string) => {
+    const date = new Date('1970-01-01 ' + time);  // Usar una fecha arbitraria para convertir la hora
+    return date.toTimeString().substring(0, 5);   // Extraer la hora en formato 24 horas (HH:mm)
   };
+  
     const [selectedSportId, setSelectedSportId] = useState<number | null>(null);
   const [price, setPrice] = useState(0);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -71,11 +69,12 @@ export default function ReservaM({
   useEffect(() => {
     const fetchCustomers = async () => {
       try {
-        const response = await fetch('http://127.0.0.1:8000/api/customer');
+        const response = await fetch(`${API_URL}/customer`);
         const data = await response.json();
         if (Array.isArray(data?.data)) {
           setCustomers(data.data);
           setFilteredCustomers(data.data);
+          console.log(data)
         } else {
           console.error("Expected 'data' property to be an array, but got:", data);
         }
@@ -85,20 +84,61 @@ export default function ReservaM({
         setLoading(false);
       }
     };
-
+    const fetchSports = async () => {
+      try {
+        const response = await fetch(`${API_URL}/sport`);
+        const data = await response.json();
+    
+        const sportsList: Sport[] = data.data || [];
+        setSports(sportsList);
+    
+        if (initialData.sport_id) {
+          const selectedSport = sportsList.find((sport: Sport) => sport.id === Number(initialData.sport_id));
+          setSelectedSportId(Number(initialData.sport_id));
+    
+          if (selectedSport) {
+            // Obtener la hora actual para determinar si es mañana o tarde
+            const newTimeEnd = formatTime(timeEnd);
+            const endHour = parseInt(newTimeEnd.split(':')[0], 10);
+            const isMorning = endHour <= 15;
+    
+            // Calcular el precio basado en el horario
+            const total1 = isMorning ? selectedSport.price_morning : selectedSport.price_evening;
+            setTotal(total1 || 0);
+            setPrice(total1 ? total1 - yape : 0); // Si total1 es válido, calcula price
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching sports:', error);
+      }
+    };
     fetchCustomers();
+    fetchSports();
+
   }, []);
 
   const handleSportChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedSportId(Number(e.target.value));
+    const sportId = Number(e.target.value);
+    setSelectedSportId(sportId);
+    const selectedSport = sports.find((s) => s.id === sportId);
+  
+    if (selectedSport) {
+      // Convierte timeStart a una hora de 24 horas
+      const newtimeend=formatTime(timeEnd)
+      const endHour = parseInt(newtimeend.split(':')[0], 10);
+      console.log(endHour)
+      const isMorning = endHour < 15;  // Consideramos 'mañana' antes de las 15:00
+      const total1 = isMorning ? selectedSport.price_morning : selectedSport.price_evening;
+      setTotal(total1 || 0);
+      setPrice(total1 ? total1 - yape : 0);  // Si total1 es válido, calcula price
+    }
   };
 
   const fetchFieldPrice = async () => {
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/field/${field}`);
+      const response = await fetch(`${API_URL}/field/${field}`);
       const data = await response.json();
       if (data?.data?.field) {
-        console.error("Existe", data);
       } else {
         console.error("Field data is not valid:", data);
       }
@@ -110,7 +150,7 @@ export default function ReservaM({
   // Fetch sports
   const fetchSports = async () => {
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/sport');
+      const response = await fetch(`${API_URL}/sport`);
       const data = await response.json();
       if (Array.isArray(data?.data)) {
         setSports(data.data);
@@ -128,29 +168,17 @@ export default function ReservaM({
     fetchSports();
   }, [field, timeStart]);
 
-  useEffect(() => {
-    if (selectedSportId) {
-      const selectedSport = sports.find((sport) => sport.id === selectedSportId);
-      if (selectedSport) {
-        const priceForTimeSlot = getPriceForTimeSlot(selectedSport, timeStart);
-        setTotal(priceForTimeSlot); 
-      }
-    }
-  }, [selectedSportId, timeStart, sports]);
+ 
 
-  const getPriceForTimeSlot = (sport: Sport, timeStart: string): number => {
-    const isMorning = timeStart.includes("AM");
-    const price: number | undefined = isMorning ? sport.price_morning : sport.price_evening;
-  
-    // Si price es undefined, devolvemos un valor por defecto, como "0"
-    return price || 0;
-  };
+
   
   
 
   const handlePhoneSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     const phoneValue = e.target.value;
     setPhoneSearch(phoneValue);
+   
+
     if (phoneValue.trim() === '') {
       setFilteredCustomers(customers); // Show all customers
       setSelectedCustomer(null); // Clear selected customer
@@ -176,11 +204,11 @@ export default function ReservaM({
 
   const handleSubmit = async () => {
     if (yape < 0) {
-      setError('El monto de Yape no puede ser negativo.');
+      console.log('El monto de Yape no puede ser negativo.');
       return;
     }
-const start_time=formatHour(timeStart)
-const end_time=formatHour(timeEnd)
+const start_time=formatTime(timeStart)
+const end_time=formatTime(timeEnd)
 
     const requestData = {
       user_id: user_id,
@@ -188,15 +216,15 @@ const end_time=formatHour(timeEnd)
       booking_date: day.toISOString().split('T')[0],
       start_time: start_time??"",
       end_time: end_time ??"",
-      price: price,
+      price: 0,
       yape: yape,
       sport_id: selectedSportId ?? 1,
       total:price+yape,
-      user_name:selectedCustomer?.name ?? ''
     };
+    console.log(requestData)
 
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/booking', {
+      const response = await fetch(`${API_URL}/booking`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -207,7 +235,7 @@ const end_time=formatHour(timeEnd)
  
       if (!response.ok) {
         const errorData = await response.json();
-        setError(`Error al guardar la reserva: ${errorData.message || 'Intente nuevamente'}`);
+        console.log(`Error al guardar la reserva: ${errorData.message || 'Intente nuevamente'}`);
         return;
       }
       console.log(requestData)
@@ -225,36 +253,54 @@ const end_time=formatHour(timeEnd)
     <Dialog>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-          <h3 className="text-xl font-bold mb-4">Reserva para Campo {field}</h3>
-          <p className="mb-2 text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
-          <p className="mb-4 text-sm text-gray-600">Día: {day.toDateString()}</p>
-          <p className="mb-4 text-sm text-gray-600">Precio de la cancha: {total}</p>
+          <h3 className="text-xl font-bold mb-3">Reserva </h3>
+          <p className="mb-3 text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
+          <p className="mb-3 text-sm text-gray-600">Día: {day.toDateString()}</p>
+          <p className="mb-3 text-sm text-gray-600">Precio de la cancha: {total}</p>
+          <p className="mb-3 text-sm text-gray-600">cancha: campo {field}</p>
 
-          <div className="mb-4 relative">
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-              Buscar por teléfono
-            </label>
-            <Input
-              id="phone"
-              type="text"
-              value={phoneSearch}
-              onChange={handlePhoneSearch}
-              className="mt-1 w-full p-2 border border-gray-300 rounded "
-            />
-            {phoneSearch && !loading && filteredCustomers.length > 0 && (
-              <ul className="absolute top-full left-0 right-0 max-h-40 overflow-auto border bg-white mt-1 z-50">
-                {filteredCustomers.map((customer) => (
-                  <li
-                    key={customer.id}
-                    onClick={() => handleCustomerSelect(customer)}
-                    className="cursor-pointer p-2 hover:bg-gray-100"
-                  >
-                    {customer.phone}
-                  </li>
-                ))}
-              </ul>
-            )}
-       </div>
+          <div className="flex justify-between items-center mb-1 ">
+          <div className="relative flex flex-col w-2/3 mt-6">
+  <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2">
+    Buscar por teléfono
+  </label>
+  <Input
+    id="phone"
+    type="text"
+    value={phoneSearch}
+    onChange={handlePhoneSearch}
+    className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+    autoComplete="off" // Esto evita la lista por defecto del navegador
+  />
+  
+  {phoneSearch && !loading && filteredCustomers.length > 0 && (
+    <ul className="absolute left-0 w-full max-h-40 overflow-auto border bg-white mt-16 z-[9999] rounded-md shadow-lg">
+      {filteredCustomers.map((customer) => (
+        <li
+          key={customer.id}
+          onClick={() => handleCustomerSelect(customer)}
+          className="cursor-pointer p-2 hover:bg-gray-100"
+        >
+          {customer.phone}
+        </li>
+      ))}
+    </ul>
+  )}
+</div>
+
+
+          <div className="flex flex-col sm:w-2/3 mt-12 ml-7">
+            <button className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+              {/* Ícono de agregar */}
+              <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14M5 12h14" />
+              </svg>
+              Nuevo Cliente
+            </button>
+          </div>
+
+            </div>
+
 
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700">Nombre</label>
@@ -274,6 +320,7 @@ const end_time=formatHour(timeEnd)
         
 
           <div className="flex justify-between mb-4">
+            {/* 
             <div>
               <label htmlFor="price" className="text-sm font-medium text-gray-700">Precio</label>
               <Input
@@ -284,23 +331,27 @@ const end_time=formatHour(timeEnd)
                 className="mt-1 p-2 w-20"
               />
             </div>
-            <div>
-              <label htmlFor="yape" className="text-sm font-medium text-gray-700">Yape</label>
+            */}
+            <div >
+              <label htmlFor="yape" className="block text-sm font-medium text-gray-700">Yape</label>
               <Input
                 id="yape"
                 value={yape}
-                onChange={(e) => setYape(Number(e.target.value))}
+                onChange={(e) => { const newYape = Number(e.target.value);  // Convierte el valor a número
+                  setYape(newYape);
+                  setPrice(total - newYape);  // Actualiza el adelanto
+                }}
                 type="number"
-                className="mt-1 p-2 w-20"
+                className="mt-1 p-2 w-48"
               />
             </div>
             
-            <div className="mb-4">
+            <div>
             <label className="block text-sm font-medium text-gray-700">Deporte</label>
             <select
               onChange={handleSportChange}
               value={selectedSportId ?? ''}
-              className="mt-1 w-full p-2 border bg-white"
+              className="mt-1 p-2 w-48 border bg-white"
             >
               {sports.map((sport) => (
                 <option key={sport.id} value={sport.id}>
@@ -310,17 +361,29 @@ const end_time=formatHour(timeEnd)
             </select>
           </div>
           </div>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertTitle>Error</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
+          <div className="flex justify-between items-center mb-1">
+
+          <div>
+              <label htmlFor="yape" className="text-sm font-medium text-gray-700 mb-2">Efectivo o Yape</label>
+              <Input
+                id="yape"
+                value={price}
+                onChange={(e) => setPrice(Number(e.target.value))}
+                type="number"
+                className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div className="flex flex-col sm:w-2/3 mt-6 ml-7">
+            <button className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+              Completar pago
+            </button>
+          </div>
+          </div>
 
 
-          <div className="flex justify-end">
-            <Button onClick={onClose} className="mr-4">Cerrar</Button>
-            <Button onClick={handleSubmit}>Guardar</Button>
+          <div className="mb-4 mt-6">
+          <Button onClick={handleSubmit} className='mt-1 w-full p-2 border bg-[#3581F2]'>Guardar</Button>
+          <Button onClick={onClose} className="mt-1 w-full p-2 border bg-[#A9A8A5]">Cerrar</Button>
           </div>
         </div>
       </div>

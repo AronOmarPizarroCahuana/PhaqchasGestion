@@ -4,6 +4,7 @@ import { FaTrashAlt, FaEdit } from "react-icons/fa";
 import { Dialog } from "@/components/ui/dialog"; // Usamos Dialog de shadcn
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
+import {API_URL} from "../../config";
 
 interface PublishedListProps {
   publishedItems: PublishedItem[];
@@ -28,7 +29,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
   const handleDelete = (id: string | undefined) => {
     if (!id) return; 
 
-    fetch(`http://127.0.0.1:8000/api/announcement/${id}`, {
+    fetch(`${API_URL}/announcement/${id}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -45,7 +46,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
     if (!id) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/announcement/updateStatus/${id}`, {
+      const response = await fetch(`${API_URL}/announcement/updateStatus/${id}`, {
         method: "GET",
       });
 
@@ -62,7 +63,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
   };
 
   const handleSubmit = (updatedItem: PublishedItem) => {
-    fetch(`http://127.0.0.1:8000/api/announcement/${updatedItem.id}`, {
+    fetch(`${API_URL}/announcement/${updatedItem.id}`, {
       method: "PUT", 
       headers: {
         "Content-Type": "application/json",
@@ -159,8 +160,8 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
                     <Image
                       src={`http://127.0.0.1:8000${item.image}`}
                       alt={item.title || "Imagen del anuncio"}
-                      width={70}
-                      height={70}
+                      width={50}
+                      height={30}
                       priority
                     />
                   ) : (

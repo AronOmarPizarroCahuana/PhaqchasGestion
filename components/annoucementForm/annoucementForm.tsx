@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { PublishedItem } from "@/app/Interface/annoucement";
 import Image from "next/image";
-
+import {API_URL} from "../../config";
 interface AnnouncementFormProps {
   reloadAnnouncements: () => void; // Cambiar addPublishedItem por reloadAnnouncements
 }
@@ -30,7 +30,7 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
     }
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/announcement", {
+      const response = await fetch(`${API_URL}/announcement`, {
         method: "POST",
         body: data,
       });

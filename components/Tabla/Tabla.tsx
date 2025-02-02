@@ -5,6 +5,7 @@ import { Reservation, Day } from './Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
+import {API_URL} from "../../config";
 
 interface TablaProps {
   field: string;
@@ -28,6 +29,8 @@ export default function Tabla({
     day: Date;
     user_id?: string;
     yape?: number;
+    sport_id?:string;
+
   } | null>(null);
 
   const [isModalOpenE, setIsModalOpenE] = useState(false);
@@ -39,7 +42,9 @@ export default function Tabla({
     user_id?: string;
     yape?: number;
     price?:number;
+    sport_id?:string;
   } | null>(null);
+  
   const [loading, setLoading] = useState(true);
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [Daysreservations, setDayReservations] = useState<Day[]>([]);
@@ -87,9 +92,9 @@ switch (day) {
     break;
 }
     const selectedDay = reservation
-    console.log("Day before formatting:", days[contador]); // Verifica la estructura de 'day'
+    //console.log("Day before formatting:", days[contador]); // Verifica la estructura de 'day'
     console.log("rservacion",selectedDay)
-    if (selectedDay && selectedDay.booking_details && selectedDay.status==="reservado" ) {
+    if (selectedDay && selectedDay.booking_details && (selectedDay.status==="reservado" || selectedDay.status==="en espera")) {
       setModalDataE({
         timeStart,
         timeEnd,
@@ -98,10 +103,11 @@ switch (day) {
         user_id: selectedDay.booking_details.id_user || "",
         yape: selectedDay.booking_details.yape || 0,
         price:selectedDay.booking_details.price || 0,
+ //       sport_id: selectedDay.booking_details.id_sport|| "",
 
       });
       setIsModalOpenE(true);
-     console.log(Daysreservations)
+    // console.log(Daysreservations)
       
     }else
     if (selectedDay && selectedDay.status==="disponible" ) {
@@ -118,8 +124,8 @@ switch (day) {
 
     }
     else{
-      console.log("no se pudo abrir el modal")
-      console.log(selectedDay.status)
+    //  console.log("no se pudo abrir el modal")
+      //console.log(selectedDay.status)
     }
   };
   
@@ -139,7 +145,7 @@ switch (day) {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/bookingsForAdmi/${field}/${startDate}/${endDate}`
+        `${API_URL}/bookingsForAdmi/${field}/${startDate}/${endDate}`
       );
       if (!response.ok) {
         throw new Error("Error al obtener los datos");
@@ -168,10 +174,9 @@ console.log(err)
     end_time: string;
     sport_id: number;
     total: number;
-    user_name: string;
 }) => {
     if (!modalData) {
-        console.error("❌ Error: modalData es undefined o null");
+      //  console.error("❌ Error: modalData es undefined o null");
         return;
     }
 
@@ -181,7 +186,7 @@ console.log(err)
     const formattedStartTime = convertTo24HourFormat(timeStart);
 
     if (!(day instanceof Date)) {
-        console.error("❌ Error: 'day' no es un objeto Date válido");
+       // console.error("❌ Error: 'day' no es un objeto Date válido");
         return;
     }
 
@@ -196,7 +201,6 @@ console.log(err)
                             booking_details: {
                                 id: Date.now(),
                                 id_user: data.user_id,
-                                user_name: data.user_name,
                                 yape: data.yape,
                                 price: data.price,
                                 total: data.total,
@@ -217,57 +221,79 @@ console.log(err)
     // 🔄 Forzar actualización llamando nuevamente a fetchDatos
     await fetchDatos();
 
-    console.log("✅ La tabla se ha actualizado correctamente.");
+   // console.log("✅ La tabla se ha actualizado correctamente.");
     handleCloseModal();
 };
 
 // 🔄 Verifica si el estado se está actualizando correctamente
 useEffect(() => {
-    console.log("🔄 Estado actualizado:", reservations);
+   // console.log("🔄 Estado actualizado:", reservations);
 }, [reservations]);
 
-  
-  const handleSaveReservationE = (data: { user_id: string; yape: number; price: number; }) => {
-    if (!modalDataE) return;
-  
-    const { timeStart, day } = modalDataE;
-    
-    // Verificar que 'day' sea un objeto Date válido
-    if (!(day instanceof Date)) {
-      console.error("La variable 'day' no es un objeto Date válido");
-      return;
-    }
-  
-    setReservations((prev) =>
-      prev.map((reservation) =>
-        reservation.hour_range?.start === timeStart
-          ? {
-              ...reservation,
-              days: reservation.days.map((d) => {
-                const dayNameFormatted = format(new Date(d.day_name), "eeee", { locale: es });
-                const selectedDayFormatted = format(day, "eeee", { locale: es });
-  
-                // Comparar los días de la semana, no las fechas completas
-                return dayNameFormatted === selectedDayFormatted
-                  ? {
-                      ...d,
-                      booking_details: {
-                        id_user: data.user_id,
-                        yape: data.yape,
-                        price: data.price,
-                        id: Date.now(),
-                        user_name: "",
-                      },
-                    }
-                  : d;
-              }),
-            }
-          : reservation
-      )
-    );
-  
-    handleCloseModalE();
-  };
+
+const handleSaveReservationE = async (data: { 
+   user_id: string;
+    start_time: string;
+    end_time: string;
+    booking_date: string;
+    yape: number;
+    price: number;
+}) => {
+  if (!modalDataE) return;
+
+  const { timeStart, day } = modalDataE;
+
+  // Verificar que 'day' sea un objeto Date válido
+  if (!(day instanceof Date)) {
+     console.error("La variable 'day' no es un objeto Date válido");
+    return;
+  }
+
+  // Convertir la hora a formato de 24 horas
+  const formattedStartTime = convertTo24HourFormat(timeStart);
+
+  // ✅ Actualiza las reservas clonando los datos
+  setReservations((prev) => {
+    const updatedReservationsE = prev.map((reservation) => {
+      if (reservation.hour_range?.start === formattedStartTime) {
+        const newDays = reservation.days.map((d) => {
+          // Compara las fechas usando 'yyyy-MM-dd' para asegurarse de que las fechas coincidan
+          if (format(new Date(d.day_name), "yyyy-MM-dd") === format(day, "yyyy-MM-dd")) {
+            return {
+              ...d,
+              booking_details: {
+                id: Date.now(), // Usar el timestamp como ID único
+                id_user: data.user_id,
+                yape: data.yape,
+                price: data.price,
+                total: data.yape + data.price, // Calculando el total según los datos recibidos
+              },
+            };
+          }
+          return d;
+        });
+
+        return { ...reservation, days: [...newDays] };
+      }
+      return reservation;
+    });
+
+    return [...updatedReservationsE]; // Forzar re-render
+  });
+
+  // 🔄 Llamada para actualizar los datos de la tabla sin recargar la página
+  await fetchDatos();
+
+  // Cerrar el modal después de guardar la reserva
+  handleCloseModalE();
+};
+
+// 🔄 Verifica si el estado se está actualizando correctamente
+useEffect(() => {
+   console.log("🔄 Estado actualizado:", reservations);
+}, [reservations]);
+
+
   
 
   const getColorClass = (status: string) => {
@@ -275,9 +301,11 @@ useEffect(() => {
       case "disponible":
         return "bg-white text-black";
       case "reservado":
-        return "bg-red-800 text-white";
+        return "bg-amber-600 text-white";
       case "en espera":
-        return "bg-yellow-600 text-white";
+        return "bg-yellow-500 text-white";
+      case "completado":
+        return "bg-red-800 text-white";
       default:
         return "bg-gray-800 text-white";
     }
@@ -344,7 +372,7 @@ useEffect(() => {
                         // Llamar a handleCellClick pasando el timeSlot, el día y la información del día seleccionado
                         handleCellClick(reservation.hour_range.start,reservation.hour_range.end, day.day_name, selectedDay);
                       } else {
-                        console.log("No se encontró el día correspondiente en reservation.days");
+                      //  console.log("No se encontró el día correspondiente en reservation.days");
                       }
                     }}
                                       >
@@ -378,6 +406,8 @@ useEffect(() => {
           initialData={{
             user_id: modalData.user_id || "",
             yape: modalData.yape || 0,
+            sport_id:"1",
+
           }}
         />
       )}
@@ -396,6 +426,7 @@ useEffect(() => {
             user_id: modalDataE.user_id || "",
             yape: modalDataE.yape || 0,
             price:modalDataE.price || 0,
+            sport_id:"1",
           }}
         />
       )}

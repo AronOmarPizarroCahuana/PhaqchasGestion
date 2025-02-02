@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PublishedItem } from "@/app/Interface/annoucement"; 
 import { AnnouncementForm } from "@/components/annoucementForm"; 
 import { PublishedList } from "@/components/annoucementTable"; 
+import {API_URL} from "../../../../config";
 
 export default function FormPage() {
   const [publishedItems, setPublishedItems] = useState<PublishedItem[]>([]);
@@ -24,7 +25,7 @@ export default function FormPage() {
   }, []);
 
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/api/announcement") 
+    fetch(`${API_URL}/announcement`) 
       .then(response => response.json())
       .then(data => {
         if (Array.isArray(data?.data)) { 
@@ -41,7 +42,7 @@ export default function FormPage() {
   }, []);
 
   const reloadAnnouncements = () => {
-    fetch("http://127.0.0.1:8000/api/announcement") 
+    fetch(`${API_URL}/announcement`) 
       .then(response => response.json())
       .then(data => {
         if (Array.isArray(data?.data)) { 

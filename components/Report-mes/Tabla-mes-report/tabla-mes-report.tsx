@@ -2,6 +2,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { Booking } from "./report-mes";
+import {API_URL} from "../../../config";
 
 interface Props {
   meses: number[]; // Recibe los meses
@@ -14,12 +15,12 @@ export default function ReporMes({ meses, año }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const API_URL = `http://127.0.0.1:8000/api/bookingsForAdmiMonth/${meses}/${año}`;
+  const API_URLC = `${API_URL}/bookingsForAdmiMonth/${meses}/${año}`;
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch(API_URLC);
         const data = await response.json();
 
         if (data.type === "success" && data.data) {

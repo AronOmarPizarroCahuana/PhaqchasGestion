@@ -5,6 +5,7 @@ import { es } from "date-fns/locale";
 import { Reservation, Day } from '../Tabla/Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
+import {API_URL} from "../../config";
 
 interface TablaProps {
   field: string;
@@ -99,7 +100,7 @@ switch (day) {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://127.0.0.1:8000/api/bookingsForAdmi/${field}/${startDate}/${endDate}`
+        `${API_URL}/bookingsForAdmi/${field}/${startDate}/${endDate}`
       );
       if (!response.ok) {
         throw new Error("Error al obtener los datos");
