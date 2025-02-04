@@ -18,8 +18,7 @@ export default function Menu() {
       {/* Botón de menú */}
       <div className="flex items-center space-x-4">
         <button
-          className="rounded-full flex items-center justify-center"
-          style={{ backgroundColor: "#F2D335", width: "3rem", height: "3rem" }}
+          className="rounded-full flex items-center justify-center bg-[#F2D335] w-8 h-8 sm:h-12 sm:w-12"
           onClick={toggleMenu}
         >
           <Image 
@@ -27,7 +26,7 @@ export default function Menu() {
             alt="Menu" 
             width={32} 
             height={32} 
-            className="w-8 h-8" 
+            className="w-5 h-5 sm:w-7 sm:h-7" 
           />
         </button>
         <h1 className="text-shadow-heavy font-Bebas-Neue text-black text-lg">Menu</h1>

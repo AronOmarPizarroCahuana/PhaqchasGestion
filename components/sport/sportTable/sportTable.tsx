@@ -1,19 +1,18 @@
 import { useState, useEffect } from "react";
-import { PublishedItem } from "@/app/Interface/annoucement";
+import { Sport } from "@/app/Interface/sport";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
 import { Dialog } from "@/components/ui/dialog"; // Usamos Dialog de shadcn
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import {API_URL} from "../../config";
+import {API_URL} from "../../../config";
 
 interface PublishedListProps {
-  publishedItems: PublishedItem[];
+  publishedItems: Sport[];
 }
 
 export function PublishedList({ publishedItems }: PublishedListProps) {
-  const [items, setItems] = useState<PublishedItem[]>(publishedItems);
+  const [items, setItems] = useState<Sport[]>(publishedItems);
   const [showModal, setShowModal] = useState(false);
-  const [editItem, setEditItem] = useState<PublishedItem | null>(null);
+  const [editItem, setEditItem] = useState<Sport | null>(null);
 
   useEffect(() => {
     setItems(publishedItems);
@@ -21,15 +20,15 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
 
  
 
-  const handleEdit = (item: PublishedItem) => {
+  const handleEdit = (item: Sport) => {
     setEditItem(item); // Establecer el ítem a editar
     setShowModal(true); // Mostrar el modal de edición
   };
 
-  const handleDelete = (id: string | undefined) => {
+  const handleDelete = (id: number | undefined) => {
     if (!id) return; 
 
-    fetch(`${API_URL}/announcement/${id}`, {
+    fetch(`${API_URL}/sport/${id}`, {
       method: "DELETE",
     })
       .then((response) => {
@@ -42,28 +41,10 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
       .catch((error) => console.error("Error al realizar la solicitud DELETE:", error));
   };
 
-  const handleStatusToggle = async (id: string | undefined) => {
-    if (!id) return;
+  
 
-    try {
-      const response = await fetch(`${API_URL}/announcement/updateStatus/${id}`, {
-        method: "GET",
-      });
-
-      if (!response.ok) throw new Error("Error al actualizar el estado");
-
-      setItems((prevItems) =>
-        prevItems.map((item) =>
-          item.id === id ? { ...item, status: !item.status } : item
-        )
-      );
-    } catch (error) {
-      console.error("Error al actualizar el estado:", error);
-    }
-  };
-
-  const handleSubmit = (updatedItem: PublishedItem) => {
-    fetch(`${API_URL}/announcement/${updatedItem.id}`, {
+  const handleSubmit = (updatedItem: Sport) => {
+    fetch(`${API_URL}/sport/${updatedItem.id}`, {
       method: "PUT", 
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +72,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
   <Dialog open={showModal} onOpenChange={(open) => setShowModal(open)}>
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
     <div className="p-4 sm:p-6 px-4 sm:px-6 bg-white rounded-lg shadow-xl w-full max-w-lg sm:max-w-md md:max-w-sm lg:max-w-md xl:max-w-lg ml-5 mr-5">
-      <h2 className="text-base sm:text-lg font-semibold mb-4">Editar Anuncio</h2>
+      <h2 className="text-base sm:text-lg font-semibold mb-4">Editar deporte</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -101,15 +82,44 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
         }}
       >
         <div className="mb-4">
-          <label htmlFor="title" className="block text-sm font-medium">Título</label>
+          <label htmlFor="title" className="block text-sm font-medium">Nombre</label>
           <input
             type="text"
             id="title"
-            value={editItem.title}
-            onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+            value={editItem.name}
+            onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
             className="w-full mt-1 p-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
           />
         </div>
+        <div className="flex space-x-4 ">
+        <div className="w-full">
+  <label className="block text-xs sm:text-sm md:text-base font-medium">Precio día</label>
+  <input
+    type="number"
+    name="price_morning"
+    id="price_morning"
+    value={editItem.price_morning}
+    onChange={(e) => setEditItem({ ...editItem, price_morning: parseFloat(e.target.value) })}
+    className="w-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+    placeholder="Escribe el precio del día"
+    required
+  />
+</div>
+
+  <div className="w-full">
+    <label className="block text-xs sm:text-sm md:text-base font-medium">Precio noche</label>
+    <input
+      type="number"
+      name="price_evening"
+      id="price_evening"
+            value={editItem.price_evening}
+            onChange={(e) => setEditItem({ ...editItem, price_evening: parseFloat(e.target.value) })}
+      className="w-full  p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+      placeholder="Escribe el precio de la noche"
+      required
+    />
+  </div>
+</div>
         <div className="mb-4 h-36">
           <label htmlFor="description" className="block text-sm font-medium">Descripción</label>
           <textarea
@@ -145,25 +155,26 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
       )}
 
       {/* Tabla */}
-      <div className="">
+      <div className="overflow-x-auto">
         <table className="min-w-full table-auto border-collapse bg-white rounded-lg shadow-md">
           <thead className="bg-gray-100 text-sm text-gray-600">
             <tr>
               <th className="px-4 py-2 border-b">Imagen</th>
-              <th className="px-4 py-2 border-b">Título</th>
+              <th className="px-4 py-2 border-b">Nombre</th>
+              <th className="px-4 py-2 border-b">Precio día</th>
+              <th className="px-4 py-2 border-b">Precio noche</th>
               <th className="px-4 py-2 border-b">Descripción</th>
-              <th className="px-4 py-2 border-b">Estado</th>
               <th className="px-4 py-2 border-b">Acción</th>
             </tr>
           </thead>
           <tbody className="text-sm text-gray-700">
             {items.map((item) => (
-              <tr key={`${item.id}-${item.title}`} className="hover:bg-gray-50">
+              <tr key={`${item.id}-${item.name}`} className="hover:bg-gray-50">
                 <td className="px-4 py-2 border-b text-center">
                   {item.image ? (
                     <Image
                       src={`https://api.dev.phaqchas.com/public${item.image}`}
-                      alt={item.title || "Imagen del anuncio"}
+                      alt={item.name || "Imagen del anuncio"}
                       width={50}
                       height={30}
                       priority
@@ -173,16 +184,11 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
                   )}
                 </td>
 
-                <td className="px-4 py-2 border-b text-center">{item.title}</td>
+                <td className="px-4 py-2 border-b text-center">{item.name}</td>
+                <td className="px-4 py-2 border-b text-center">{item.price_morning}</td>
+                <td className="px-4 py-2 border-b text-center">{item.price_evening}</td>
                 <td className="px-4 py-2 border-b text-center">{item.description}</td>
-                <td className="px-4 py-2 border-b text-center">
-                  <Button
-                    className={`px-4 py-2 rounded text-white ${item.status ? "bg-green-400" : "bg-gray-400"}`}
-                    onClick={() => handleStatusToggle(item.id)}
-                  >
-                    {item.status ? "Activo" : "Inactivo"}
-                  </Button>
-                </td>
+
                 <td className="px-4 py-2 border-b text-center">
                   <button onClick={() => handleEdit(item)} title="Editar">
                     <FaEdit className="text-blue-500 hover:text-blue-700" />

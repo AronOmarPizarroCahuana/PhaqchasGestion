@@ -288,7 +288,16 @@ const handleComplete = async () => {
         console.error('Error response:', errorText);
         throw new Error('Error al cancelar la reserva');
       }
-
+      const requestPayment2={
+        yape:price,
+        user_id,
+      start_time:"",
+      end_time:"",
+      booking_date:"",
+      price:0,
+      sport_id:0,
+      }
+      onSave(requestPayment2)
       alert('Reserva cancelada correctamente');
       onClose(); // Cerrar el modal después de cancelar
     } catch (error) {
@@ -398,7 +407,6 @@ const handleComplete = async () => {
                 value={yape}
                 onChange={(e) =>{ const newYape = Number(e.target.value);  // Convierte el valor a número
                   setYape(newYape);
-                  setPrice(total - newYape);  // Actualiza el adelanto
                 }}
                 type="number"
                 className="mt-1 p-2 w-48"
@@ -410,7 +418,7 @@ const handleComplete = async () => {
             <select
               onChange={handleSportChange}
               value={selectedSportId ?? ''}
-              className="mt-1 p-2 w-48 border bg-white"
+              className="mt-1 p-2 w-full border bg-white"
             >
               {sports.map((sport) => (
                 <option key={sport.id} value={sport.id}>
@@ -423,7 +431,7 @@ const handleComplete = async () => {
           <div className="flex justify-between items-center mb-1">
 
           <div>
-              <label htmlFor="yape" className="text-sm font-medium text-gray-700 mb-2">Efectivo o Yape</label>
+              <label htmlFor="yape" className="text-sm font-medium text-gray-700 mb-2">Monto restante</label>
               <Input
                 id="yape"
                 value={price}

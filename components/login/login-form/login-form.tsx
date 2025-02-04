@@ -1,8 +1,10 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { Ysabeau_SC } from "next/font/google";
 import { Poppins } from "next/font/google";
 import { useRouter } from "next/navigation"; // Importamos useRouter
+import { API_URL } from "../../../config";
+import Swal from "sweetalert2";
 
 const poppins = Poppins({ subsets: ["latin"], weight: ["400", "700"] });
 const ysabeau = Ysabeau_SC({ subsets: ["latin"], weight: "400" });
@@ -10,35 +12,63 @@ const ysabeau = Ysabeau_SC({ subsets: ["latin"], weight: "400" });
 export default function ImageLogin() {
   const [dni, setDni] = useState("");
   const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ dni?: string; password?: string }>({}); // ✅ useState dentro del componente
   const router = useRouter(); // Creamos una instancia de useRouter
 
   // Función para manejar el envío del formulario
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    let newErrors: { dni?: string; password?: string } = {};
+
+    if (!dni) {
+      newErrors.dni = "El usuario es obligatorio.";
+    }
+
+    if (!password) {
+      newErrors.password = "La contraseña es obligatoria.";
+    }
+
+    // ✅ Actualizar los errores antes de hacer la solicitud
+    setErrors(newErrors);
+
+    // Si hay errores, detener el proceso de login
+    if (Object.keys(newErrors).length > 0) return;
 
     try {
-      const response = await fetch("http://127.0.0.1:8000/api/auth/login", {
+      const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          dni,
-          password,
-        }),
+        body: JSON.stringify({ dni, password }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Token:", data.access_token); // Aquí recibes el token
-        // Puedes almacenar el token en localStorage o en un estado global si es necesario
-        router.push("/AdminGestion"); // Rediriges al usuario a la ruta deseada
+        console.log("Token:", data.access_token);
+        Swal.fire({
+          title: "Datos correctos!",
+          text: "Bienvenido al Sistema",
+          icon: "success",
+        });
+
+        router.push("/AdminGestion"); // Redirigir al usuario
       } else {
-        // Si la respuesta no es exitosa, mostramos un mensaje en la consola
-        console.log("La contraseña o el usuario están mal");
+        const errorData = await response.json();
+        Swal.fire({
+          title: "Denegado",
+          text: errorData.message || "Ocurrió un error inesperado.",
+          icon: "error",
+        });
       }
     } catch (error) {
       console.error("Error al hacer la solicitud:", error);
+      Swal.fire({
+        title: "Error",
+        text: "No se pudo conectar con el servidor.",
+        icon: "error",
+      });
     }
   };
 
@@ -53,26 +83,35 @@ export default function ImageLogin() {
             Inicie sesión para ingresar al sistema
           </h2>
 
+          {/* Campo Usuario */}
           <div className="text-left">
             <h1 className={`${poppins.className} text-gray-700 text-sm sm:text-lg`}>Usuario</h1>
             <input
               type="text"
               value={dni}
               onChange={(e) => setDni(e.target.value)}
-              className="w-full p-4 border rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#006FA6]"
+              className={`w-full p-4 border rounded-3xl focus:outline-none focus:ring-2 ${
+                errors.dni ? "border-red-500 focus:ring-red-500" : "focus:ring-[#006FA6]"
+              }`}
             />
+            {errors.dni && <p className="text-red-500 text-sm mt-1">{errors.dni}</p>}
           </div>
 
+          {/* Campo Contraseña */}
           <div className="text-left">
             <h1 className={`${poppins.className} text-gray-700 text-sm sm:text-lg`}>Contraseña</h1>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full p-4 border rounded-3xl focus:outline-none focus:ring-2 focus:ring-[#006FA6]"
+              className={`w-full p-4 border rounded-3xl focus:outline-none focus:ring-2 ${
+                errors.password ? "border-red-500 focus:ring-red-500" : "focus:ring-[#006FA6]"
+              }`}
             />
+            {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
           </div>
 
+          {/* Botón Ingresar */}
           <button
             onClick={handleLogin}
             className={`${poppins.className} w-full sm:w-96 bg-[#006FA6] text-base sm:text-lg text-white font-medium py-2 rounded-2xl hover:bg-[#005a85] transition`}

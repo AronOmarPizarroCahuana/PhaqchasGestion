@@ -3,16 +3,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { PublishedItem } from "@/app/Interface/annoucement";
+import { Field } from "@/app/Interface/field";
 import Image from "next/image";
-import {API_URL} from "../../config";
+import {API_URL} from "../../../config";
 interface AnnouncementFormProps {
   reloadAnnouncements: () => void; // Cambiar addPublishedItem por reloadAnnouncements
 }
 
 export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps) {
-  const [formData, setFormData] = useState<PublishedItem>({
-    title: "",
+  const [formData, setFormData] = useState<Field>({
+    name: "",
     description: "",
     image: null,
     status: true,
@@ -23,14 +23,14 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
     e.preventDefault();
 
     const data = new FormData();
-    data.append("title", formData.title);
+    data.append("name", formData.name);
     data.append("description", formData.description);
     if (formData.image) {
       data.append("image", formData.image);
     }
 
     try {
-      const response = await fetch(`${API_URL}/announcement`, {
+      const response = await fetch(`${API_URL}/field`, {
         method: "POST",
         body: data,
       });
@@ -44,7 +44,7 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
 
         console.log("Anuncio enviado:", { ...formData, id: result.id, imageUrl });
 
-        setFormData({ title: "", description: "", image: null, status: true });
+        setFormData({ name: "", description: "", image: null, status: true });
         setUploadedImageUrl(imageUrl);
         alert("Anuncio publicado con éxito.");
       } else {
@@ -87,20 +87,20 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
   return (
     <form onSubmit={handleSubmit} className="space-y-6  p-4 sm:p-6 mt-8 mb-8">
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Título</Label>
+      <Label className="block text-xs sm:text-sm md:text-base font-medium">Nombre</Label>
       <Input
         type="text"
-        name="title"
-        value={formData.title}
+        name="name"
+        value={formData.name}
         onChange={handleChange}
         className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
-        placeholder="Escribe el título del anuncio"
+        placeholder="Escribe el Nombre de la cancha"
         required
       />
     </div>
   
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Subir Imagen</Label>
+      <Label className="block text-xs sm:text-sm md:text-base font-medium">Subir imagen</Label>
       <div
         className="w-full h-full sm:h-48  p-4 border border-[#C0BCBC] rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
         onClick={() => document.getElementById("fileInput")?.click()}
@@ -162,7 +162,7 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
         onChange={handleChange}
         className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[96px] sm:min-h-[112px] md:min-h-[128px] resize-none"
         rows={4}
-        placeholder="Escribe la descripción del anuncio"
+        placeholder="Escribe la descripción de la cancha"
         required
       />
     </div>

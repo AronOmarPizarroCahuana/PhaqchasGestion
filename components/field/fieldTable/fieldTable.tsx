@@ -1,52 +1,29 @@
 import { useState, useEffect } from "react";
-import { PublishedItem } from "@/app/Interface/annoucement";
+import { Field } from "@/app/Interface/field";
 import { FaTrashAlt, FaEdit } from "react-icons/fa";
 import { Dialog } from "@/components/ui/dialog"; // Usamos Dialog de shadcn
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import {API_URL} from "../../config";
+import {API_URL} from "../../../config";
 
-interface PublishedListProps {
-  publishedItems: PublishedItem[];
+interface FieldProps {
+    FieldItems: Field[];
 }
 
-export function PublishedList({ publishedItems }: PublishedListProps) {
-  const [items, setItems] = useState<PublishedItem[]>(publishedItems);
+export function PublishedList({ FieldItems }: FieldProps) {
+  const [items, setItems] = useState<Field[]>(FieldItems);
   const [showModal, setShowModal] = useState(false);
-  const [editItem, setEditItem] = useState<PublishedItem | null>(null);
+  const [editItem, setEditItem] = useState<Field | null>(null);
 
   useEffect(() => {
-    setItems(publishedItems);
-  }, [publishedItems]);
-
- 
-
-  const handleEdit = (item: PublishedItem) => {
-    setEditItem(item); // Establecer el ítem a editar
-    setShowModal(true); // Mostrar el modal de edición
-  };
-
-  const handleDelete = (id: string | undefined) => {
-    if (!id) return; 
-
-    fetch(`${API_URL}/announcement/${id}`, {
-      method: "DELETE",
-    })
-      .then((response) => {
-        if (response.ok) {
-          setItems(items.filter((item) => item.id !== id)); // Eliminar el anuncio de la lista
-        } else {
-          console.error("Error al eliminar el anuncio");
-        }
-      })
-      .catch((error) => console.error("Error al realizar la solicitud DELETE:", error));
-  };
+    setItems(FieldItems);
+  }, [FieldItems]);
 
   const handleStatusToggle = async (id: string | undefined) => {
     if (!id) return;
 
     try {
-      const response = await fetch(`${API_URL}/announcement/updateStatus/${id}`, {
+      const response = await fetch(`${API_URL}/field/updateStatus/${id}`, {
         method: "GET",
       });
 
@@ -62,8 +39,31 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
     }
   };
 
-  const handleSubmit = (updatedItem: PublishedItem) => {
-    fetch(`${API_URL}/announcement/${updatedItem.id}`, {
+  const handleEdit = (item: Field) => {
+    setEditItem(item); // Establecer el ítem a editar
+    setShowModal(true); // Mostrar el modal de edición
+  };
+
+  const handleDelete = (id: string | undefined) => {
+    if (!id) return; 
+
+    fetch(`${API_URL}/field/${id}`, {
+      method: "DELETE",
+    })
+      .then((response) => {
+        if (response.ok) {
+          setItems(items.filter((item) => item.id !== id)); // Eliminar el anuncio de la lista
+        } else {
+          console.error("Error al eliminar el anuncio");
+        }
+      })
+      .catch((error) => console.error("Error al realizar la solicitud DELETE:", error));
+  };
+
+ 
+
+  const handleSubmit = (updatedItem: Field) => {
+    fetch(`${API_URL}/field/${updatedItem.id}`, {
       method: "PUT", 
       headers: {
         "Content-Type": "application/json",
@@ -91,7 +91,7 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
   <Dialog open={showModal} onOpenChange={(open) => setShowModal(open)}>
   <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 ">
     <div className="p-4 sm:p-6 px-4 sm:px-6 bg-white rounded-lg shadow-xl w-full max-w-lg sm:max-w-md md:max-w-sm lg:max-w-md xl:max-w-lg ml-5 mr-5">
-      <h2 className="text-base sm:text-lg font-semibold mb-4">Editar Anuncio</h2>
+      <h2 className="text-base sm:text-lg font-semibold mb-4">Editar cancha</h2>
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -101,12 +101,12 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
         }}
       >
         <div className="mb-4">
-          <label htmlFor="title" className="block text-sm font-medium">Título</label>
+          <label htmlFor="name" className="block text-sm font-medium">Nombre de la cancha</label>
           <input
             type="text"
-            id="title"
-            value={editItem.title}
-            onChange={(e) => setEditItem({ ...editItem, title: e.target.value })}
+            id="name"
+            value={editItem.name}
+            onChange={(e) => setEditItem({ ...editItem, name: e.target.value })}
             className="w-full mt-1 p-2 border rounded-md border-gray-300 focus:ring-2 focus:ring-blue-500 text-sm sm:text-base"
           />
         </div>
@@ -144,13 +144,12 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
    
       )}
 
-      {/* Tabla */}
-      <div className="">
+       {/* Tabla */}
+       <div className="overflow-x-auto">
         <table className="min-w-full table-auto border-collapse bg-white rounded-lg shadow-md">
           <thead className="bg-gray-100 text-sm text-gray-600">
             <tr>
-              <th className="px-4 py-2 border-b">Imagen</th>
-              <th className="px-4 py-2 border-b">Título</th>
+              <th className="px-4 py-2 border-b">Cancha</th>
               <th className="px-4 py-2 border-b">Descripción</th>
               <th className="px-4 py-2 border-b">Estado</th>
               <th className="px-4 py-2 border-b">Acción</th>
@@ -158,22 +157,22 @@ export function PublishedList({ publishedItems }: PublishedListProps) {
           </thead>
           <tbody className="text-sm text-gray-700">
             {items.map((item) => (
-              <tr key={`${item.id}-${item.title}`} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border-b text-center">
-                  {item.image ? (
-                    <Image
-                      src={`https://api.dev.phaqchas.com/public${item.image}`}
-                      alt={item.title || "Imagen del anuncio"}
-                      width={50}
-                      height={30}
-                      priority
-                    />
-                  ) : (
-                    <span>No Image</span>
-                  )}
-                </td>
+              <tr key={`${item.id}-${item.name}`} className="hover:bg-gray-50">
+               <td className="px-4 py-2 border-b text-center flex items-center space-x-2">
+                    {item.image ? (
+                        <Image
+                        src={`https://api.dev.phaqchas.com/public${item.image}`}
+                        alt={item.name || "Imagen del anuncio"}
+                        width={50}
+                        height={30}
+                        priority
+                        />
+                    ) : (
+                        <span>No image</span>
+                    )}
+                    <span>{item.name}</span>
+                    </td>
 
-                <td className="px-4 py-2 border-b text-center">{item.title}</td>
                 <td className="px-4 py-2 border-b text-center">{item.description}</td>
                 <td className="px-4 py-2 border-b text-center">
                   <Button

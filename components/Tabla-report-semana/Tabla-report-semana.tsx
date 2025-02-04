@@ -272,6 +272,8 @@ console.log(err)
           initialData={{
             user_id: modalData.user_id || "",
             yape: modalData.yape || 0,
+            sport_id:"1",
+
           }}
         />
       )}

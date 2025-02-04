@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { PublishedItem } from "@/app/Interface/annoucement"; 
-import { AnnouncementForm } from "@/components/annoucementForm"; 
-import { PublishedList } from "@/components/annoucementTable"; 
+import { Field } from "@/app/Interface/field"; 
+import { AnnouncementForm } from "@/components/field/fieldForm/fieldForm"; 
+import { PublishedList } from "@/components/field/fieldTable/fieldTable"; 
 import {API_URL} from "../../../../config";
 
 export default function FormPage() {
-  const [publishedItems, setPublishedItems] = useState<PublishedItem[]>([]);
+  const [publishedItems, setPublishedItems] = useState<Field[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -25,7 +25,7 @@ export default function FormPage() {
   }, []);
 
   useEffect(() => {
-    fetch(`${API_URL}/announcement`) 
+    fetch(`${API_URL}/field`) 
       .then(response => response.json())
       .then(data => {
         if (Array.isArray(data?.data)) { 
@@ -42,7 +42,7 @@ export default function FormPage() {
   }, []);
 
   const reloadAnnouncements = () => {
-    fetch(`${API_URL}/announcement`) 
+    fetch(`${API_URL}/field`) 
       .then(response => response.json())
       .then(data => {
         if (Array.isArray(data?.data)) { 
@@ -61,7 +61,7 @@ export default function FormPage() {
   return (
     <div className="flex flex-col md:flex-row">
       <div className="w-full md:w-1/2 p-10">
-        <h1 className="text-2xl font-semibold mb-4 text-center font-inter text-[#7B7B7B] text-[25px] sm:text-[32px]">Generar anuncios</h1>
+        <h1 className="text-2xl font-semibold mb-4 text-center font-inter text-[#7B7B7B] text-[32px]">Añadir canchas</h1>
 
         {isMobile ? (
           <>
@@ -69,7 +69,7 @@ export default function FormPage() {
               className="w-full bg-[#E1BC00] text-white py-2 px-4 rounded-md"
               onClick={() => setIsModalOpen(true)}
             >
-              + Crear Anuncio
+              + Crear cancha
             </Button>
 
             {/* Modal */}
@@ -85,7 +85,7 @@ export default function FormPage() {
                     &times;
                   </button>
               
-                  <h2 className="text-xl font-bold mb-10">Nuevo Anuncio</h2>
+                  <h2 className="text-xl font-bold mb-10">Nueva cancha</h2>
                   <AnnouncementForm reloadAnnouncements={reloadAnnouncements} />
                 </div>
               </div>
@@ -99,7 +99,7 @@ export default function FormPage() {
 
       <div className="w-full md:w-1/2 p-4 border-t md:border-l md:border-t-0 border-gray-300">
   <div className="overflow-x-auto max-h-[calc(100vh-250px)] md:max-h-[calc(100vh-200px)]"> 
-    <PublishedList publishedItems={publishedItems} />
+    <PublishedList FieldItems={publishedItems} />
   </div>
 </div>
 

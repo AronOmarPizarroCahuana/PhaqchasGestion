@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { format, addDays } from "date-fns";
 import { es } from "date-fns/locale";
-import { Reservation, Day } from './Reservation';
+import { Reservation, Day } from './../Tabla/Reservation';
 import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
@@ -145,14 +145,14 @@ switch (day) {
   const handleCloseModal = () => {
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 500);
+    }, 2000);
     setIsModalOpen(false);
     setModalData(null);
   };
   const handleCloseModalE = () => {
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 500);
+    }, 2000);
     setIsModalOpenE(false);
     setModalDataE(null);
   };
@@ -237,7 +237,7 @@ console.log(err)
     // Después de 5 segundos, restablecer el estado de la animación
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 500);
+    }, 2000);
     // 🔄 Forzar actualización llamando nuevamente a fetchDatos
     await fetchDatos();
 
@@ -302,7 +302,7 @@ const handleSaveReservationE = async (data: {
   });
   setTimeout(() => {
     setAnimatingCell(null); // Detenemos la animación
-  }, 500);
+  }, 2000);
   // 🔄 Llamada para actualizar los datos de la tabla sin recargar la página
   await fetchDatos();
 
@@ -315,7 +315,22 @@ useEffect(() => {
    console.log("🔄 Estado actualizado:", reservations);
 }, [reservations]);
 
-
+function formatHour(time: string) {
+    // Detecta si el tiempo está en formato de 12 horas AM/PM
+    const [hour, minute] = time.split(":");
+    const ampm = time.includes("AM") || time.includes("PM") ? time.slice(-2) : ""; // AM/PM
+    
+    let hourNumber = parseInt(hour, 10); // Convierte la hora a número
+  
+    if (ampm === "PM" && hourNumber < 12) {
+      hourNumber += 12; // Convertir a formato de 24 horas
+    } else if (ampm === "AM" && hourNumber === 12) {
+      hourNumber = 0; // Maneja el caso de la medianoche (12 AM)
+    }
+  
+    return hourNumber; // Devuelve la hora en formato de 24 horas sin ceros iniciales
+  }
+  
   
 
   const getColorClass = (status: string) => {
@@ -342,78 +357,71 @@ useEffect(() => {
   
   return (
     <div className="overflow-x-auto bg-neutra">
-      <Table className="table-fixed w-full text-sm border-separate min-w-[1500px]">
-        <thead className="bg-gray-100">
-          <tr>
-            <th className="w-[5%]"></th>
-            <th className="border p-3 bg-[#5A6BA0] text-white w-[10%]">Hora</th>
-            {days.map((day) => (
-              <th
-                key={day.toISOString()}
-                className="border p-3 text-center bg-[#8D9EC1] text-white"
-              >
-                <div>{format(day, "eeee", { locale: es })}</div>
-                <div>{format(day, "d")}</div>
-              </th>
-            ))}
-          </tr>
-          <tr>
-            <th className="w-[5%]"></th>
-            <th className="w-[5%] bg-[#5A6BA0] text-white">Detalle</th>
-            {days.map((day, index) => (
-              <th key={index} className="border px-4 py-2 text-xs bg-[#8D9EC1] text-white">
-                <div className="flex justify-between items-center w-full">
-                  <span>Reserva</span>
-                  <span>Yape</span>
-                  <span>Precio</span>
-                </div>
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {reservations.map((reservation, index) => (
-            <tr key={index}>
-              <td className="rotate-0 border text-[12px] font-bold font-inter text-center bg-white text-[#454545]">CAMPO {field}</td>
-              {reservation.hour_range && (
-                <td className="border text-center text-[13px] font-semibold font-inter  bg-white text-[#454545]">
-                  {reservation.hour_range.start} - {reservation.hour_range.end}
-                </td>
-              )}
-              {reservation.days.map((day, dayIndex) => {
-                const status = day.status || "disponible";
-                const cellKey = `${reservation.hour_range.start}-${reservation.hour_range.end}-${day.day_name}`;
+    <Table className=" w-full h-full text-sm  sm:min-w-[320px] table-fixed">
+  <thead className="bg-gray-100">
 
-                return (
-                  <td
-                  key={dayIndex}
-                  className={`border px-4 py-2 text-xs ${getColorClass(status)} 
-                    ${animatingCell === cellKey ? 'animate-colorAnimation' : ''}`}
-                  onClick={() => {
-                    const selectedDay = reservation.days.find(d => d.day_name === day.day_name);
-                    if (selectedDay) {
-                      handleCellClick(reservation.hour_range.start, reservation.hour_range.end, day.day_name, selectedDay,status);
-                    }
-                  }}
-                >
-                
-                                      
-                    {day.booking_details ? (
-                      <div className="flex justify-between items-center w-full">
-                        <span>{day.booking_details.user_name}</span>
-                        <span>{day.booking_details.yape}</span>
-                        <span>{day.booking_details.price}</span>
-                      </div>
-                    ) : (
-                      <div className="text-center">Disponible</div>
-                    )}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </Table>
+  <tr>
+  <th className="w-[10%]"></th>
+  <th className="border bg-[#5A6BA0] font-thin text-white text-[5px] custom:text-[6px] w-[12%] p-1 h-auto leading-tight">
+    Hora
+  </th> 
+  {days.map((day) => (
+    <th
+      key={day.toISOString()}
+      className="border w-[15%] text-center font-thin leading-tight bg-[#8D9EC1] text-white text-[5px] custom:text-[6px]  h-auto"
+    >
+      <div>{format(day, "eeee", { locale: es })} - {format(day, "d")}</div>
+    </th>
+  ))}
+</tr>
+
+   
+
+
+  </thead>
+  <tbody>
+    {reservations.map((reservation, index) => (
+      <tr key={index} >
+        <td className="rotate-0 border leading-tight h-auto   font-bold font-inter text-center bg-white text-[#454545] text-[4px] custom:text-[5px]">
+          CAMPO {field}
+        </td>
+        {reservation.hour_range && (
+          <td className="border text-center text-[6px] leading-tight h-auto  font-semibold font-inter bg-white text-[#454545] custom:text-[7px] w-[15%]"> 
+            {formatHour(reservation.hour_range.start)} - {formatHour(reservation.hour_range.end)}
+          </td>
+        )}
+        {reservation.days.map((day, dayIndex) => {
+          const status = day.status || "disponible";
+          const cellKey = `${reservation.hour_range.start}-${reservation.hour_range.end}-${day.day_name}`;
+
+          return (
+            <td
+              key={dayIndex}
+              className={`border  leading-tight h-auto p-[2px] text-[6px] ${getColorClass(status)} 
+                ${animatingCell === cellKey ? 'animate-colorAnimation' : ''} sm:text-xs w-[15%]`}
+              onClick={() => {
+                const selectedDay = reservation.days.find(d => d.day_name === day.day_name);
+                if (selectedDay) {
+                  handleCellClick(reservation.hour_range.start, reservation.hour_range.end, day.day_name, selectedDay, status);
+                }
+              }}
+            >
+              {day.booking_details ? (
+                <div className="flex justify-between items-center w-full">
+                  {/* Show booking details */}
+                </div>
+              ) : (
+                <div className="text-center">...</div>
+              )}
+            </td>
+          );
+        })}
+      </tr>
+    ))}
+  </tbody>
+</Table>
+
+
 
       {modalData && isModalOpen && (
        

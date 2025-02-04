@@ -9,6 +9,9 @@ export default {
   ],
   theme: {
   	extend: {
+		screens: {
+			'custom': '403px', // breakpoint personalizado para 403px
+		  },
 		animation: {
 			fadeIn: 'fadeIn 1s ease-out forwards',
 		  },

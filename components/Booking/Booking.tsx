@@ -5,6 +5,7 @@ import { format, startOfWeek, addWeeks, subWeeks, addDays } from 'date-fns';
 import { es } from 'date-fns/locale';
 import Tabla from '../Tabla/Tabla';
 import TablaTop from '../TablaTop/TablaTop';
+import Link from 'next/link';
 
 // Definimos el tipo de 'fields'
 const fields = ['1', '2', '3', '4'] as const;
@@ -42,8 +43,17 @@ export default function Booking() {
   const getEndDateForWeek = (weekStart: Date) => format(addDays(weekStart, 6), 'yyyy-MM-dd');
 
   return (
-    <div className="p-6 bg-[#EFEFEF] rounded-lg shadow-lg space-y-8">
+    <div className="py-[1px] px-[6px] sm:p-3 bg-[#EFEFEF] rounded-lg shadow-lg  ">
+      
       <div className="space-y-4">
+      <div className="fixed bottom-5 left-1/2 top-1 -translate-x-1/2 z-50 sm:hidden">
+  <Link
+    href="/AdminGestion/Reserva-zoom"
+    className="bg-blue-600 text-white p-4 rounded-lg shadow-lg hover:bg-blue-700 transition flex items-center justify-center w-11 h-11"
+  >
+    <i className="fas fa-search-plus text-xl"></i>
+  </Link>
+</div>
         {fields.map((field) => {
           const currentWeekStart = weekStartDates[field];
           const startDate = getStartDateForWeek(currentWeekStart);
@@ -51,29 +61,42 @@ export default function Booking() {
 
           return (
             <div key={field}>
-              <div className="flex justify-between items-center bg-white">
-                <button
-                  className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
-                  onClick={() => handlePreviousWeek(field)}
-                >
-                  Semana Anterior
-                </button>
-                <h2 className="text-xl font-semibold text-center flex-grow text-gray-700">
-                  {format(currentWeekStart, 'MMMM yyyy', { locale: es }).toUpperCase()}
-                </h2>
-                <button
-                  className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition"
-                  onClick={() => handleNextWeek(field)}
-                >
-                  Siguiente Semana
-                </button>
-              </div>
+ <div className="flex justify-between items-center bg-white ">
+  <button
+    className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition flex items-center sm:space-x-2 space-x-0"
+    onClick={() => handlePreviousWeek(field)}
+  >
+    <span className="hidden sm:inline">Semana Anterior</span>
+    <span className="sm:hidden">
+      <i className="fas fa-chevron-left w-5 h-5"></i>
+    </span>
+  </button>
+
+  <h2 className="text-xl font-semibold text-center flex-grow text-gray-700">
+    {format(currentWeekStart, 'MMMM yyyy', { locale: es }).toUpperCase()}
+  </h2>
+
+  <button
+    className="bg-blue-600 text-white px-5 py-2 rounded-lg shadow-md hover:bg-blue-700 transition flex items-center sm:space-x-2 space-x-0"
+    onClick={() => handleNextWeek(field)}
+  >
+    <span className="hidden sm:inline">Siguiente Semana</span>
+    <span className="sm:hidden">
+      <i className="fas fa-chevron-right w-5 h-5"></i>
+    </span>
+  </button>
+</div>
+
+
+
+
               <TablaTop />
               <Tabla id={field} field={field} startDate={startDate} endDate={endDate} currentWeekStart={currentWeekStart} />
             </div>
+            
           );
         })}
       </div>
-    </div>
+      </div>
   );
 }

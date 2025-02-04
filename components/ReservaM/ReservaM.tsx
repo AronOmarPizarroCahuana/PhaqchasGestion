@@ -16,7 +16,7 @@ interface ReservaMProps {
     user_id: string;
     yape: number;
     price: number;
-    field_id: string;
+    field_id: number;
     booking_date: string;
     start_time: string;
     end_time: string;
@@ -134,16 +134,48 @@ export default function ReservaM({
     }
   };
 
-  const fetchFieldPrice = async () => {
+  const handleComplete = async () => {
+    if (yape < 0) {
+      console.log('El monto de Yape no puede ser negativo.');
+      return;
+    }
+const start_time=formatTime(timeStart)
+const end_time=formatTime(timeEnd)
+
+    const requestData = {
+      user_id: user_id,
+      field_id: Number(field),
+      booking_date: day.toISOString().split('T')[0],
+      start_time: start_time??"",
+      end_time: end_time ??"",
+      price: 0,
+      yape: price,
+      sport_id: selectedSportId ?? 1,
+      total:price,
+    };
+    console.log(requestData)
+
     try {
-      const response = await fetch(`${API_URL}/field/${field}`);
-      const data = await response.json();
-      if (data?.data?.field) {
-      } else {
-        console.error("Field data is not valid:", data);
+      const response = await fetch(`${API_URL}/booking`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(requestData),
+      });
+ 
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.log(`Error al guardar la reserva: `,errorData);
+        return;
       }
+      console.log(requestData)
+      onSave(requestData)
+      onClose();
     } catch (error) {
-      console.error('Error fetching field data:', error);
+      console.log(requestData)
+      console.log(`Hubo un problema: ${error}`);
     }
   };
 
@@ -164,7 +196,6 @@ export default function ReservaM({
 
   // useEffect to call both functions
   useEffect(() => {
-    fetchFieldPrice();
     fetchSports();
   }, [field, timeStart]);
 
@@ -212,7 +243,7 @@ const end_time=formatTime(timeEnd)
 
     const requestData = {
       user_id: user_id,
-      field_id: field,
+      field_id: Number(field),
       booking_date: day.toISOString().split('T')[0],
       start_time: start_time??"",
       end_time: end_time ??"",
@@ -235,7 +266,7 @@ const end_time=formatTime(timeEnd)
  
       if (!response.ok) {
         const errorData = await response.json();
-        console.log(`Error al guardar la reserva: ${errorData.message || 'Intente nuevamente'}`);
+        console.log(`Error al guardar la reserva: `,errorData);
         return;
       }
       console.log(requestData)
@@ -254,13 +285,13 @@ const end_time=formatTime(timeEnd)
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
         <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
           <h3 className="text-xl font-bold mb-3">Reserva </h3>
-          <p className="mb-3 text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
-          <p className="mb-3 text-sm text-gray-600">Día: {day.toDateString()}</p>
-          <p className="mb-3 text-sm text-gray-600">Precio de la cancha: {total}</p>
-          <p className="mb-3 text-sm text-gray-600">cancha: campo {field}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Día: {day.toDateString()}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Precio de la cancha: {total}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">cancha: campo {field}</p>
 
-          <div className="flex justify-between items-center mb-1 ">
-          <div className="relative flex flex-col w-2/3 mt-6">
+          <div className="flex justify-between items-center mb-1 -mt-6 sm:mt-0">
+          <div className="relative flex flex-col w-2/3 mt-5">
   <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2">
     Buscar por teléfono
   </label>
@@ -290,12 +321,12 @@ const end_time=formatTime(timeEnd)
 
 
           <div className="flex flex-col sm:w-2/3 mt-12 ml-7">
-            <button className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+            <button className="bg-[#3581F2] w-full  h-9 text-white py-1 sm:py-2 p-2 rounded-md hover:bg-blue-800 transition duration-200 flex items-center text-[10px] sm:text-[15px] ">
               {/* Ícono de agregar */}
-              <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 sm:w-4 h-6 sm:mr-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14M5 12h14" />
               </svg>
-              Nuevo Cliente
+              Nuevo cliente
             </button>
           </div>
 
@@ -319,7 +350,7 @@ const end_time=formatTime(timeEnd)
 
         
 
-          <div className="flex justify-between mb-4">
+          <div className="flex justify-between mb-2 sm:mb-4">
             {/* 
             <div>
               <label htmlFor="price" className="text-sm font-medium text-gray-700">Precio</label>
@@ -339,7 +370,6 @@ const end_time=formatTime(timeEnd)
                 value={yape}
                 onChange={(e) => { const newYape = Number(e.target.value);  // Convierte el valor a número
                   setYape(newYape);
-                  setPrice(total - newYape);  // Actualiza el adelanto
                 }}
                 type="number"
                 className="mt-1 p-2 w-48"
@@ -351,7 +381,7 @@ const end_time=formatTime(timeEnd)
             <select
               onChange={handleSportChange}
               value={selectedSportId ?? ''}
-              className="mt-1 p-2 w-48 border bg-white"
+              className="mt-1  p-2 w-full border bg-white"
             >
               {sports.map((sport) => (
                 <option key={sport.id} value={sport.id}>
@@ -361,20 +391,21 @@ const end_time=formatTime(timeEnd)
             </select>
           </div>
           </div>
-          <div className="flex justify-between items-center mb-1">
+          <div className="flex justify-between items-center ">
 
           <div>
-              <label htmlFor="yape" className="text-sm font-medium text-gray-700 mb-2">Efectivo o Yape</label>
+              <label htmlFor="yape" className="text-sm font-medium text-gray-700 mb-2">Monto restante</label>
               <Input
-                id="yape"
+                id="price"
                 value={price}
                 onChange={(e) => setPrice(Number(e.target.value))}
                 type="number"
                 className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled
               />
             </div>
             <div className="flex flex-col sm:w-2/3 mt-6 ml-7">
-            <button className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+            <button onClick={handleComplete}  className="bg-[#3581F2] text-white py-1 h-9 sm:py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center text-[10px] sm:text-[15px]">
               Completar pago
             </button>
           </div>

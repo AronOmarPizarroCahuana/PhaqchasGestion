@@ -70,3 +70,36 @@ body {
     @apply bg-background text-foreground;
   }
 }
+/* Animación para el color de la capa */
+@keyframes colorAnimation {
+  0% {
+    background-color: rgba(0, 0, 0, 0.3); /* Opaco */
+  }
+  100% {
+    background-color: rgba(0, 0, 0, 0); /* Transparente */
+  }
+}
+
+/* Clase que se aplica a las celdas cuando se seleccionan */
+td {
+  position: relative; /* Para que la capa se posicione correctamente sobre la celda */
+  overflow: hidden; /* Asegura que la capa no se desborde fuera de la celda */
+}
+
+td::after {
+  content: ''; /* Crea un contenido vacío */
+  position: absolute; /* Posiciona la capa dentro de la celda */
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0); /* Transparente por defecto */
+  z-index: 1; /* Coloca la capa encima del contenido de la celda */
+  pointer-events: none; /* Hace que los clics no afecten la capa */
+  transition: background-color 0.3s ease; /* Transición para un cambio suave */
+}
+
+/* Aplicar la animación cuando la celda se selecciona */
+td.animate-colorAnimation::after {
+  animation: colorAnimation 0.3s ease-in-out infinite alternate;
+}
