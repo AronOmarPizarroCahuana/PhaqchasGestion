@@ -33,14 +33,24 @@ export default function Menu() {
       </div>
 
       {/* Menú deslizante */}
-      <div
-        className={`fixed top-0 left-0 w-64 h-screen bg-white z-50 transform ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full sm:-translate-x-72"
-        } transition-transform duration-300`}
-        style={{ marginTop: "4rem" }}
-      >
-        <NavbarLeft />
-      </div>
+      <div>
+  {isMenuOpen && (
+    <div
+      className="fixed inset-0 bg-[#00000000] bg-opacity-50 z-40"
+      onClick={() => setIsMenuOpen(false)}
+    ></div>
+  )}
+
+  <div
+    className={`fixed top-0 left-0 w-64 h-screen bg-white z-50 transform ${
+      isMenuOpen ? "translate-x-0" : "-translate-x-full sm:-translate-x-72"
+    } transition-transform duration-300`}
+    style={{ marginTop: "4rem" }}
+  >
+    <NavbarLeft />
+  </div>
+</div>
+
     </div>
   );
 }

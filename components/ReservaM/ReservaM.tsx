@@ -52,7 +52,7 @@ export default function ReservaM({
   const [yape, setYape] = useState(initialData.yape);
   const [sports, setSports] = useState<Sport[]>([]);
   const [total, setTotal] = useState(0); // Estado para el total
-
+  const [phoneError, setPhoneError] = useState('');
   const formatTime = (time: string) => {
     const date = new Date('1970-01-01 ' + time);  // Usar una fecha arbitraria para convertir la hora
     return date.toTimeString().substring(0, 5);   // Extraer la hora en formato 24 horas (HH:mm)
@@ -267,9 +267,22 @@ const end_time=formatTime(timeEnd)
  
       if (!response.ok) {
         const errorData = await response.json();
+        if (errorData.message?.includes('user')) {
+          setPhoneError('El número de celular es obligatorio');
+        } else if(errorData.message?.includes('booking')) {
+          Swal.fire({
+            title: "Datos incorrectos!",
+            text: "Reserva en una fecha actual o posterior, por favor",
+            icon: "error",
+          });
+
+        } else
+
         console.log(`Error al guardar la reserva: `,errorData);
         return;
       }
+      setPhoneError(''); // Limpia el error si la respuesta es exitosa
+
       console.log(requestData)
       onSave(requestData)
       onClose();
@@ -291,9 +304,9 @@ const end_time=formatTime(timeEnd)
           <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Precio de la cancha: {total}</p>
           <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">cancha: campo {field}</p>
 
-          <div className="flex justify-between items-center mb-1 -mt-6 sm:mt-0">
-          <div className="relative flex flex-col w-2/3 mt-5">
-  <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2">
+          <div className="flex justify-between items-center mb-1 mt-2 sm:mt-0">
+          <div className="relative flex flex-col w-2/3 ">
+  <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-23">
     Buscar por teléfono
   </label>
   <Input
@@ -304,7 +317,10 @@ const end_time=formatTime(timeEnd)
     className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
     autoComplete="off" // Esto evita la lista por defecto del navegador
   />
-  
+   <p className={`absolute text-red-500 mt-14 text-[10px] ${phoneError ? 'opacity-100' : 'opacity-0'} transition-opacity duration-300 mt-1`}>
+    {phoneError || ' '}
+  </p>
+
   {phoneSearch && !loading && filteredCustomers.length > 0 && (
     <ul className="absolute left-0 w-full max-h-40 overflow-auto border bg-white mt-16 z-[9999] rounded-md shadow-lg">
       {filteredCustomers.map((customer) => (
@@ -320,21 +336,21 @@ const end_time=formatTime(timeEnd)
   )}
 </div>
 
-
-          <div className="flex flex-col sm:w-2/3 mt-12 ml-7">
+{/* 
+          <div className="flex flex-col sm:w-2/3  mt-5 ml-7">
             <button className="bg-[#3581F2] w-full  h-9 text-white py-1 sm:py-2 p-2 rounded-md hover:bg-blue-800 transition duration-200 flex items-center text-[10px] sm:text-[15px] ">
-              {/* Ícono de agregar */}
+             
               <svg className="w-3 sm:w-4 h-6 sm:mr-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14M5 12h14" />
               </svg>
               Nuevo cliente
             </button>
-          </div>
+          </div>  */}
 
             </div>
 
-
-          <div className="mb-4">
+          
+          <div className="mb-4 mt-4">
             <label className="block text-sm font-medium text-gray-700">Nombre</label>
             <Input
               value={selectedCustomer?.name || ''}
@@ -373,6 +389,8 @@ const end_time=formatTime(timeEnd)
                   setYape(newYape);
                 }}
                 type="number"
+                 min="0"
+                 max={price}
                 className="mt-1 p-2 w-48"
               />
             </div>

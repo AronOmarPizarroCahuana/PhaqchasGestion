@@ -6,6 +6,8 @@ import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
 import {API_URL} from "../../config";
+import {  TableHeader, TableRow, TableHead, TableBody, TableCell } from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TablaProps {
   field: string;
@@ -263,7 +265,6 @@ const handleSaveReservationE = async (data: {
 
   const { timeStart, day } = modalDataE;
 
-  // Verificar que 'day' sea un objeto Date válido
   if (!(day instanceof Date)) {
      console.error("La variable 'day' no es un objeto Date válido");
     return;
@@ -323,9 +324,9 @@ useEffect(() => {
       case "disponible":
         return "bg-white text-black";
       case "reservado":
-        return "bg-amber-600 text-white";
+        return "bg-orange-500 text-white";
       case "en espera":
-        return "bg-yellow-500 text-white";
+        return "bg-yellow-400 text-white";
       case "completado":
         return "bg-red-800 text-white";
       default:
@@ -334,9 +335,69 @@ useEffect(() => {
   };
 
 
-  if (loading) 
+  if (loading ) 
    {
-    return <div>cargando ..</div>
+    return <div>
+
+<Table className="table-fixed w-full text-sm border-separate min-w-[1500px]">
+  <TableHeader>
+    <TableRow>
+      <TableHead className="w-[5%]">&nbsp;</TableHead>
+      <TableHead className="border p-3 w-[10%]">
+        {typeof window !== 'undefined' && <Skeleton className="h-4 w-16" />}
+      </TableHead>
+      {[...Array(7)].map((_, index) => (
+        <TableHead key={`header-${index}`} className="border p-3 text-center">
+          {typeof window !== 'undefined' && (
+            <>
+              <Skeleton className="h-4 w-20 mx-auto" />
+              <Skeleton className="h-3 w-10 mx-auto mt-1" />
+            </>
+          )}
+        </TableHead>
+      ))}
+    </TableRow>
+
+    <TableRow>
+      <TableHead className="w-[5%]">&nbsp;</TableHead>
+      <TableHead className="w-[5%]">
+        {typeof window !== 'undefined' && <Skeleton className="h-4 w-16" />}
+      </TableHead>
+      {[...Array(7)].map((_, index) => (
+        <TableHead key={`subheader-${index}`} className="border px-4 py-2 text-xs">
+          {typeof window !== 'undefined' && (
+            <div className="flex justify-between items-center w-full">
+              <Skeleton className="h-3 w-12" />
+              <Skeleton className="h-3 w-10" />
+              <Skeleton className="h-3 w-8" />
+            </div>
+          )}
+        </TableHead>
+      ))}
+    </TableRow>
+  </TableHeader>
+
+  <TableBody>
+    {[...Array(12)].map((_, rowIndex) => (
+      <TableRow key={`row-${rowIndex}`}>
+        <TableCell className="border text-center">
+          {typeof window !== 'undefined' && <Skeleton className="h-4 w-20 mx-auto" />}
+        </TableCell>
+        <TableCell className="border text-center">
+          {typeof window !== 'undefined' && <Skeleton className="h-4 w-24 mx-auto" />}
+        </TableCell>
+        {[...Array(7)].map((_, cellIndex) => (
+          <TableCell key={`cell-${rowIndex}-${cellIndex}`} className="border px-4 py-2 text-xs text-center">
+            {typeof window !== 'undefined' && <Skeleton className="h-6 w-full" />}
+          </TableCell>
+        ))}
+      </TableRow>
+    ))}
+  </TableBody>
+</Table>
+
+
+    </div>
    }
   
   

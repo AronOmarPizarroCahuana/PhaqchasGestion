@@ -19,7 +19,7 @@ export default function ImageLogin() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    let newErrors: { dni?: string; password?: string } = {};
+    const newErrors: { dni?: string; password?: string } = {};
 
     if (!dni) {
       newErrors.dni = "El usuario es obligatorio.";
@@ -46,18 +46,45 @@ export default function ImageLogin() {
 
       if (response.ok) {
         const data = await response.json();
-        console.log("Token:", data.access_token);
+        console.log("Token:1", data.access_token);
+        fetch(`${API_URL}/auth/me`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.access_token}`,
+          }
+        })
+        .then(response => response.json())
+        .then(data1 => {
+         if(data1.rol_id == 1){
+          console.log(data.access_token)
+          localStorage.setItem("authToken", data.access_token);
       
-        // Guardar el token en localStorage
-        localStorage.setItem("authToken", data.access_token);
+          Swal.fire({
+            title: "Datos correctos!",
+            text: "Bienvenido al sistema",
+            icon: "success",
+          });
+        
+          router.push("/AdminGestion"); // Redirigir al usuario
+         }
+else{
       
-        Swal.fire({
-          title: "Datos correctos!",
-          text: "Bienvenido al Sistema",
-          icon: "success",
+  Swal.fire({
+    title: "Rechazo del sistema!",
+    text: "Usted no es un administrador",
+    icon: "error",
+  });
+
+}
+
+         })
+        .catch((error) => {
+          // Imprime errores de la solicitud fetch
+          console.error("Error with PUT request:", error);
         });
-      
-        router.push("/AdminGestion"); // Redirigir al usuario
+        // Guardar el token en localStorage
+       
       }
       else {
         const errorData = await response.json();

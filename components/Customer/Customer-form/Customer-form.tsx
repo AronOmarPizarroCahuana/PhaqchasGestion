@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
+import { Customer } from "@/app/Interface/customer";
 
 interface CustomerFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onAddCustomer: (newCustomer: any) => void; // Recibe el nuevo cliente
+  onAddCustomer: (newCustomer: Customer) => void; // Recibe el nuevo cliente
 }
 
-const AddCustomerModal: React.FC<CustomerFormProps> = ({ isOpen, onClose, onAddCustomer }) => {
+const AddCustomerModal: React.FC<CustomerFormProps> = ({ isOpen, onClose, onAddCustomer  }) => {
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [dni, setDni] = useState('');
@@ -80,7 +81,10 @@ const AddCustomerModal: React.FC<CustomerFormProps> = ({ isOpen, onClose, onAddC
       if (response.ok) {
         console.log('Cliente agregado', response);
         onClose(); // Cierra el modal
-        onAddCustomer(customerData)
+        if(onAddCustomer != null){
+          onAddCustomer(customerData)
+        }
+      
       } else {
         const errorDetails = await response.json();
         console.error('Detalles del error:', errorDetails);

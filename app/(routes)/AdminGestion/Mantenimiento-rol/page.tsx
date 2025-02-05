@@ -13,13 +13,32 @@ export default function FormPage() {
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
+    // Detectar si la pantalla es pequeña
     const checkScreenSize = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(window.innerWidth < 768); // Para celulares
     };
+    
     checkScreenSize();
     window.addEventListener("resize", checkScreenSize);
-
+    
     return () => window.removeEventListener("resize", checkScreenSize);
+  }, []);
+
+  useEffect(() => {
+    fetch(`${API_URL}/admi`) 
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data?.data)) { 
+          setPublishedItems(data.data);
+        } else {
+          console.error("La respuesta de la API no contiene un array:", data);
+          setPublishedItems([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setPublishedItems([]);
+      });
   }, []);
 
   const fetchAdmins = () => {

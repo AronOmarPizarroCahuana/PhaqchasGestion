@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil } from 'lucide-react';
 import { Search } from 'lucide-react'; // Importa el ícono de búsqueda
 import AddCustomerModal from '../Customer-form/Customer-form'; // Importa tanto el componente como la interfaz si es necesario
 import EditCustomerModal from '../Customer-form-edit/Customer-form-edit'; // Importa tanto el componente como la interfaz si es necesario

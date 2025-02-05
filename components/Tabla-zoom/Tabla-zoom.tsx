@@ -6,6 +6,7 @@ import { Table } from '@/components/ui/table';
 import ReservaM from "../ReservaM/ReservaM";
 import ReservaEdit from "../ReservaEdit/ReservaEdit";
 import {API_URL} from "../../config";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface TablaProps {
   field: string;
@@ -103,7 +104,6 @@ switch (day) {
 }
     const selectedDay = reservation
     //console.log("Day before formatting:", days[contador]); // Verifica la estructura de 'day'
-    console.log("rservacion",selectedDay)
     if (selectedDay && selectedDay.booking_details && (selectedDay.status==="reservado" || selectedDay.status==="en espera")) {
       setModalDataE({
         timeStart,
@@ -145,14 +145,14 @@ switch (day) {
   const handleCloseModal = () => {
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 2000);
+    }, 500);
     setIsModalOpen(false);
     setModalData(null);
   };
   const handleCloseModalE = () => {
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 2000);
+    }, 500);
     setIsModalOpenE(false);
     setModalDataE(null);
   };
@@ -237,7 +237,7 @@ console.log(err)
     // Después de 5 segundos, restablecer el estado de la animación
     setTimeout(() => {
       setAnimatingCell(null); // Detenemos la animación
-    }, 2000);
+    }, 500);
     // 🔄 Forzar actualización llamando nuevamente a fetchDatos
     await fetchDatos();
 
@@ -302,7 +302,7 @@ const handleSaveReservationE = async (data: {
   });
   setTimeout(() => {
     setAnimatingCell(null); // Detenemos la animación
-  }, 2000);
+  }, 500);
   // 🔄 Llamada para actualizar los datos de la tabla sin recargar la página
   await fetchDatos();
 
@@ -312,12 +312,11 @@ const handleSaveReservationE = async (data: {
 
 // 🔄 Verifica si el estado se está actualizando correctamente
 useEffect(() => {
-   console.log("🔄 Estado actualizado:", reservations);
 }, [reservations]);
 
 function formatHour(time: string) {
     // Detecta si el tiempo está en formato de 12 horas AM/PM
-    const [hour, minute] = time.split(":");
+    const [hour] = time.split(":");
     const ampm = time.includes("AM") || time.includes("PM") ? time.slice(-2) : ""; // AM/PM
     
     let hourNumber = parseInt(hour, 10); // Convierte la hora a número
@@ -338,7 +337,7 @@ function formatHour(time: string) {
       case "disponible":
         return "bg-white text-black";
       case "reservado":
-        return "bg-amber-600 text-white";
+        return "bg-orange-500 text-white";
       case "en espera":
         return "bg-yellow-500 text-white";
       case "completado":
@@ -351,7 +350,44 @@ function formatHour(time: string) {
 
   if (loading) 
    {
-    return <div>cargando ..</div>
+    return <div>
+       <div className="w-full overflow-x-auto">
+      <table className="w-full text-xs table-fixed border-collapse">
+        <thead>
+          <tr>
+            <th className="w-[10%] p-1">
+              <Skeleton className="h-3 w-full" />
+            </th>
+            <th className="w-[12%] p-1">
+              <Skeleton className="h-3 w-full" />
+            </th>
+            {[...Array(5)].map((_, index) => (
+              <th key={index} className="w-[15%] p-1">
+                <Skeleton className="h-3 w-full" />
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {[...Array(12)].map((_, rowIndex) => (
+            <tr key={rowIndex}>
+              <td className="border p-1">
+                <Skeleton className="h-2 w-full" />
+              </td>
+              <td className="border p-1">
+                <Skeleton className="h-2 w-full" />
+              </td>
+              {[...Array(5)].map((_, colIndex) => (
+                <td key={colIndex} className="border p-1">
+                  <Skeleton className="h-2 w-full" />
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+    </div>
    }
   
   
@@ -362,13 +398,13 @@ function formatHour(time: string) {
 
   <tr>
   <th className="w-[10%]"></th>
-  <th className="border bg-[#5A6BA0] font-thin text-white text-[5px] custom:text-[6px] w-[12%] p-1 h-auto leading-tight">
+  <th className="border bg-[#5A6BA0] font-inter text-white text-[5px] custom:text-[6px] w-[12%] p-1 h-auto leading-tight">
     Hora
   </th> 
   {days.map((day) => (
     <th
       key={day.toISOString()}
-      className="border w-[15%] text-center font-thin leading-tight bg-[#8D9EC1] text-white text-[5px] custom:text-[6px]  h-auto"
+      className="border w-[15%] text-center font-inter leading-tight bg-[#8D9EC1] text-white text-[5px] custom:text-[6px]  h-auto"
     >
       <div>{format(day, "eeee", { locale: es })} - {format(day, "d")}</div>
     </th>

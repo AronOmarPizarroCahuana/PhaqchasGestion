@@ -23,8 +23,13 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
     e.preventDefault();
 
     const data = new FormData();
-    data.append("title", formData.title);
-    data.append("description", formData.description);
+    if(formData.title!=null){
+      data.append("title", formData.title);
+
+    }
+    if(formData.description!=null){
+
+    data.append("description", formData.description);}
     if (formData.image) {
       data.append("image", formData.image);
     }
