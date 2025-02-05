@@ -85,24 +85,24 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6  p-4 sm:p-6 mt-8 mb-8">
+    <form onSubmit={handleSubmit} className="space-y-3  p-4 sm:p-6 md:space-y-3 mt-8 lg:mt-2">
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Título</Label>
+      <Label className="block text-xs sm:text-sm md:text-[15px] font-medium">Título</Label>
       <Input
         type="text"
         name="title"
         value={formData.title}
         onChange={handleChange}
-        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-[15px] text-[10px] min-h-[0px] sm:min-h-[27px] md:min-h-[28px]"
         placeholder="Escribe el título del anuncio"
         required
       />
     </div>
   
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Subir Imagen</Label>
+      <Label className="block text-xs sm:text-sm md:text-[15px] font-medium">Subir Imagen</Label>
       <div
-        className="w-full h-full sm:h-48  p-4 border border-[#C0BCBC] rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
+        className="w-full lg:h-52 sm:h-32 md:h-36  p-4 border border-[#C0BCBC] rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
         onClick={() => document.getElementById("fileInput")?.click()}
       >
         <input
@@ -120,15 +120,15 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
               width={50}
               height={50}
             />
-            <p className="text-xs sm:text-sm md:text-base">Haz clic o arrastra una imagen aquí</p>
+            <p className="sm:text-[15px] text-[10px] md:text-[15px]">Haz clic o arrastra una imagen aquí</p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center">
             <Image
               src={URL.createObjectURL(formData.image)}
               alt="Uploaded"
-              width={120}
-              height={120}
+              width={100}
+              height={100}
             />
             <Button
               onClick={() => {
@@ -155,12 +155,12 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
     </div>
   
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Descripción</Label>
+      <Label className="block text-xs sm:text-sm md:text-base md:text-[15px] font-medium">Descripción</Label>
       <Textarea
         name="description"
         value={formData.description}
         onChange={handleChange}
-        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[96px] sm:min-h-[112px] md:min-h-[128px] resize-none"
+        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-[15px] text-[10px] min-h-[96px] sm:min-h-[102px] md:h-[8px] resize-none"
         rows={4}
         placeholder="Escribe la descripción del anuncio"
         required

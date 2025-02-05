@@ -35,7 +35,7 @@ export default function Menu() {
       {/* Menú deslizante */}
       <div
         className={`fixed top-0 left-0 w-64 h-screen bg-white z-50 transform ${
-          isMenuOpen ? "translate-x-0" : "-translate-x-full"
+          isMenuOpen ? "translate-x-0" : "-translate-x-full sm:-translate-x-72"
         } transition-transform duration-300`}
         style={{ marginTop: "4rem" }}
       >

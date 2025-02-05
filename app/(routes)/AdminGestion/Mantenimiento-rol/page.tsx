@@ -1,115 +1,90 @@
 'use client';
-const AdminPage = () => {
 
-  return(
-    <h2>mantenimiento page</h2>
-  )
-}
-export default AdminPage;
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Admin } from "@/app/Interface/admin";
+import AdminForm from "@/components/Roles/Insert-roles/insert-roles"; 
+import { AdminList } from "@/components/Roles/Tabla-roles"; 
+import { API_URL } from "../../../../config";
 
-/*
-import { useState, useEffect } from 'react';
-import UserForm from './../../../../components/Roles/Insert-roles/insert-roles';
-import UserTable from './../../../../components/Roles/Tabla-roles/Tabla-roles';
-
-interface User {
-  id: number; // He cambiado el id a obligatorio, si es opcional asegúrate de manejarlo correctamente
-  name: string;
-  surname: string;
-  password: string;
-  dni: string;
-  phone: string;
-  status: string;
-  rol_id: string;
-}
-
-const AdminPage = () => {
-  const [users, setUsers] = useState<User[]>([]);
-  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+export default function FormPage() {
+  const [publishedItems, setPublishedItems] = useState<Admin[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/api/admi');
-        if (!response.ok) throw new Error('Error al obtener los usuarios');
-        const data = await response.json();
-        setUsers(data.data);
-      } catch (error) {
-        console.error('Error fetching users:', error);
-      }
+    const checkScreenSize = () => {
+      setIsMobile(window.innerWidth < 768);
     };
+    checkScreenSize();
+    window.addEventListener("resize", checkScreenSize);
 
-    fetchUsers();
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  const handleAddUser = async (formData: User) => {
-    const newUser = {
-      name: formData.name,
-      surname: formData.surname,
-      password: formData.password,
-      dni: formData.dni,
-      phone: formData.phone,
-      status: formData.status,
-      rol_id: formData.rol_id === 'Administrador' ? '1' : '2', // Mantén el tipo string si así es requerido
-    };
-  
-    console.log('Form Data:', newUser);
-  
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/admi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(newUser),
+  const fetchAdmins = () => {
+    fetch(`${API_URL}/admi`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (Array.isArray(data?.data)) {
+          setPublishedItems(data.data);
+        } else {
+          console.error("La respuesta de la API no contiene un array:", data);
+          setPublishedItems([]);
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+        setPublishedItems([]);
       });
-  
-      const data = await response.json();
-  
-      if (response.ok) {
-        setUsers((prevUsers) => [...prevUsers, data]);
-      } else {
-        const errorMessage = data.message || 'Error desconocido';
-        console.error('Error adding user:', errorMessage);
-        alert(`Error: ${errorMessage}`);
-      }
-    } catch (error) {
-      console.error('Error adding user:', error);
-      alert(`Error al intentar agregar el usuario: ${error || error}`);
-    }
   };
 
-  const handleDeleteUser = async (id: number) => {
-    try {
-      const response = await fetch(`http://127.0.0.1:8000/api/admi/${id}`, {
-        method: 'DELETE',
-      });
-
-      if (!response.ok) throw new Error('Error al eliminar el usuario');
-
-      setUsers((prevUsers) => prevUsers.filter((user) => user.id !== id));
-    } catch (error) {
-      console.error('Error deleting user:', error);
-    }
-  };
-
-  const handleEditUser = (user: User) => {
-    setSelectedUser(user);
-  };
+  useEffect(() => {
+    fetchAdmins();
+  }, []);
 
   return (
-    <div className="p-8 space-y-8 bg-gray-100">
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h1 className="text-xl font-semibold text-blue-600 mb-2">Agregar nuevo usuario</h1>
-        <UserForm onSubmit={handleAddUser} />
+    <div className="flex flex-col md:flex-row">
+      <div className="w-full md:w-1/2 p-10">
+        <h1 className="text-2xl font-semibold mb-4 text-center text-[#7B7B7B] text-[25px] sm:text-[32px]">
+          Gestionar Administradores
+        </h1>
+
+        {isMobile ? (
+          <>
+            <Button
+              className="w-full bg-[#E1BC00] text-white py-2 px-4 rounded-md"
+              onClick={() => setIsModalOpen(true)}
+            >
+              + Crear Administrador
+            </Button>
+
+            {isModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+                <div className="bg-white p-6 rounded-lg w-11/12 max-w-lg shadow-lg relative">
+                  <button
+                    className="absolute top-2 right-2 text-2xl text-gray-600"
+                    onClick={() => setIsModalOpen(false)}
+                  >
+                    &times;
+                  </button>
+
+                  <h2 className="text-xl font-bold mb-4">Nuevo Administrador</h2>
+                  <AdminForm onSubmit={fetchAdmins} reloadAnnouncements={fetchAdmins} />
+                </div>
+              </div>
+            )}
+          </>
+        ) : (
+          <AdminForm onSubmit={fetchAdmins} reloadAnnouncements={fetchAdmins} />
+        )}
       </div>
 
-      <div className="bg-white p-6 rounded-lg shadow-md">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">Lista de usuarios con acceso al sistema</h2>
-        <UserTable users={users} onDelete={handleDeleteUser} onEdit={handleEditUser} />
+      <div className="w-full md:w-1/2 p-4 border-t md:border-l md:border-t-0 border-gray-300">
+        <div className="overflow-x-auto max-h-[calc(100vh-250px)] md:max-h-[calc(100vh-200px)]">
+          <AdminList FieldItems={publishedItems} />
+        </div>
       </div>
     </div>
   );
-};
-
-export default AdminPage;*/
+}

@@ -102,39 +102,41 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6  p-4 sm:p-6 mt-8 mb-8">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-6 xl:space-y-8 p-4 sm:p-3 mt-8 mb-8">
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Nombre del deporte</Label>
+      <Label className="block text-xs sm:text-[15px] xl:text-base font-medium">Nombre del deporte</Label>
       <Input
         type="text"
         name="name"
+        placeholder="Nombre del deporte"
+
         value={formData.name}
         onChange={handleChange}
-        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-[15px] xl:text-base min-h-[0px] sm:min-h-[40px] xl:min-h-[56px]"
         required
       />
     </div>
     <div className="flex space-x-4 ">
   <div className="w-full">
-    <Label className="block text-xs sm:text-sm md:text-base font-medium">Precio día</Label>
+    <Label className="block text-xs sm:text-[15px] xl:text-base font-medium">Precio día</Label>
     <Input
       type="number"
       name="price_morning"
       value={formData.price_morning}
       onChange={handleChange}
-      className="w-full  p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+      className="w-full  p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[40px] xl:min-h-[56px]"
       required
     />
   </div>
 
   <div className="w-full">
-    <Label className="block text-xs sm:text-sm md:text-base font-medium">Precio noche</Label>
+    <Label className="block text-xs sm:text-[15px] xl:text-base font-medium">Precio noche</Label>
     <Input
       type="number"
       name="price_evening"
       value={formData.price_evening}
       onChange={handleChange}
-      className="w-full  p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[0px] sm:min-h-[48px] md:min-h-[56px]"
+      className="w-full  p-2 border border-gray-300 rounded text-xs sm:text-[15px] xl:text-base min-h-[0px] sm:min-h-[40px] xl:min-h-[56px]"
       placeholder="Escribe el precio de la noche"
       required
     />
@@ -142,21 +144,21 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
 </div>
 
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Descripción</Label>
+      <Label className="block text-xs sm:text-[15px] xl:text-base font-medium">Descripción</Label>
       <Textarea
         name="description"
         value={formData.description}
         onChange={handleChange}
-        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-sm md:text-base min-h-[96px] sm:min-h-[112px] md:min-h-[128px] resize-none"
+        className="w-full h-full p-2 border border-gray-300 rounded text-xs sm:text-[15px] xl:text-base min-h-[80px] sm:min-h-[96px] xl:min-h-[128px] resize-none"
         rows={4}
-        placeholder="Escribe la descripción del anuncio"
+        placeholder="Escribe la descripción del deporte"
         required
       />
     </div>
     <div>
-      <Label className="block text-xs sm:text-sm md:text-base font-medium">Subir imagen</Label>
+      <Label className="block text-xs sm:text-[15px] xl:text-base font-medium">Subir imagen</Label>
       <div
-        className="w-full h-full sm:h-48  p-4 border border-[#C0BCBC] rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
+        className="w-full h-full sm:h-36 xl:h-48  p-4 border border-[#C0BCBC] rounded-[30px] flex items-center justify-center cursor-pointer bg-[#F9F9F9]"
         onClick={() => document.getElementById("fileInput")?.click()}
       >
         <input
@@ -171,10 +173,10 @@ export function AnnouncementForm({ reloadAnnouncements }: AnnouncementFormProps)
             <Image
               src="/subir.png"
               alt="Image Icon"
-              width={50}
-              height={50}
+              width={40}
+              height={40}
             />
-            <p className="text-xs sm:text-sm md:text-base">Haz clic o arrastra una imagen aquí</p>
+            <p className="text-xs sm:text-[15px] xl:text-base">Haz clic o arrastra una imagen aquí</p>
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center">

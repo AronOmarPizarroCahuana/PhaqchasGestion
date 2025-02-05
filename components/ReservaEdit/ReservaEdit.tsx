@@ -309,25 +309,22 @@ const handleComplete = async () => {
   return (
     <Dialog>
       <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-        <div className="bg-white p-6 rounded shadow-lg max-w-md w-full">
-        <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-5xl text-gray-600 hover:text-gray-900 focus:outline-none"
-        >
-          <div className="flex items-center justify-center w-8 h-8 rounded-full bg-slate-500">
-            <span className="text-white">&times;</span>
-          </div>
-        </button>
-
+      <div className="bg-white p-6 rounded shadow-lg max-w-md w-full relative">
+  <button 
+    className="absolute -top-2 right-2 text-[40px] text-gray-600 bg-transparent hover:text-gray-800"
+    onClick={onClose}
+  >
+    &times;
+  </button>
 
 
           <h3 className="text-xl font-bold mb-3">Reserva </h3>
-          <p className="mb-3 text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
-          <p className="mb-3 text-sm text-gray-600">Día: {day.toDateString()}</p>
-          <p className="mb-3 text-sm text-gray-600">Precio de la cancha: {total}</p>
-          <p className="mb-3 text-sm text-gray-600">cancha: campo {field}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Hora: {timeStart} - {timeEnd}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Día: {day.toDateString()}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">Precio de la cancha: {total}</p>
+          <p className="mb-2 sm:mb-3 text-[11px] sm:text-sm text-gray-600">cancha: campo {field}</p>
 
-          <div className="flex justify-between items-center mb-1 ">
+          <div className="flex justify-between items-center mb-1 -mt-6 sm:mt-0 ">
           <div className="relative flex flex-col w-2/3 mt-6">
           <label htmlFor="phone" className="text-sm font-medium text-gray-700 mb-2">
             Buscar por teléfono
@@ -358,9 +355,9 @@ const handleComplete = async () => {
 
 
           <div className="flex flex-col sm:w-2/3 mt-12 ml-7">
-            <button className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+            <button className="bg-[#3581F2] w-full  h-9 text-white py-1 sm:py-2 p-2 rounded-md hover:bg-blue-800 transition duration-200 flex items-center text-[10px] sm:text-[15px] ">
               {/* Ícono de agregar */}
-              <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="w-3 sm:w-4 h-6 sm:mr-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 5v14M5 12h14" />
               </svg>
               Nuevo Cliente
@@ -387,7 +384,7 @@ const handleComplete = async () => {
 
         
 
-          <div className="flex justify-between mb-4">
+          <div className="flex justify-between mb-2 sm:mb-4">
             {/* 
             <div>
               <label htmlFor="price" className="text-sm font-medium text-gray-700">Precio</label>
@@ -442,7 +439,7 @@ const handleComplete = async () => {
               />
             </div>
             <div className="flex flex-col sm:w-2/3 mt-6 ml-7">
-            <button  onClick={handleComplete}  className="bg-[#3581F2] text-white py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center">
+            <button  onClick={handleComplete}  className="bg-[#3581F2] text-white py-1 h-9 sm:py-2 px-5 rounded-md hover:bg-blue-800 transition duration-200 flex items-center text-[10px] sm:text-[15px]">
               Completar pago
             </button>
           </div>

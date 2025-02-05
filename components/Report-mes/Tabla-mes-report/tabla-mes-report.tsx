@@ -93,9 +93,9 @@ console.log(dates)
 
   return (
     <div className="container mx-3 p-4">
-    <h1 className="text-2xl font-bold mb-4">{obtenerMes(meses)} {año} </h1>
-    <div className="overflow-x-visible">
-      <table className="min-w-full border-collapse border border-gray-300">
+    <h1 className="text-[10px] sm:text-2xl font-bold mb-4">{obtenerMes(meses)} {año} </h1>
+    <div className="overflow-x-visible ">
+      <table className=" min-w-42  sm:min-w-full border-collapse border border-gray-300">
         <thead>
           <tr className="bg-gray-100">
             <th className="border border-gray-300 px-6 py-2  bg-[#93A3C4] text-white">Campo</th>
@@ -116,7 +116,7 @@ console.log(dates)
               key={index}
               className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}
             >
-              <td className="border border-gray-300 px-4 py-2 font-bold">
+              <td className="border border-gray-300 px-4 py-2  font-bold">
                 {fieldName}
               </td>
               {dates.map((date, i) => (
@@ -127,7 +127,7 @@ console.log(dates)
                   {fieldData[fieldName][date] || 0}
                 </td>
               ))}
-              <td className="border border-gray-300 px-4 py-2 font-bold text-center bg-blue-500 text-white">
+              <td className="border border-gray-300 px-4  py-1 sm:py-2 font-bold text-center bg-blue-500 text-white ">
                 {fieldTotals[fieldName] || 0}
               </td>
             </tr>

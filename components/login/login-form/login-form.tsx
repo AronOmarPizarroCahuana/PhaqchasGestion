@@ -47,14 +47,19 @@ export default function ImageLogin() {
       if (response.ok) {
         const data = await response.json();
         console.log("Token:", data.access_token);
+      
+        // Guardar el token en localStorage
+        localStorage.setItem("authToken", data.access_token);
+      
         Swal.fire({
           title: "Datos correctos!",
           text: "Bienvenido al Sistema",
           icon: "success",
         });
-
+      
         router.push("/AdminGestion"); // Redirigir al usuario
-      } else {
+      }
+      else {
         const errorData = await response.json();
         Swal.fire({
           title: "Denegado",
